@@ -6,20 +6,29 @@ import { useMemo } from 'react';
  * StarBackground component that renders animated stars
  */
 export default function StarBackground() {
-  // Generate random star positions to avoid hydration errors
+  // Generate deterministic star positions to avoid hydration errors
   const starPositions = useMemo(() => {
     const positions = [];
-    const numStars = 150;
+    const numStars = 250;
 
-    // Simple pure randomness - no patterns, no grids, no algorithms
+    // Use a deterministic seed-based approach
+    const seed = 12345; // Fixed seed for consistent generation
+    let currentSeed = seed;
+
+    // Simple deterministic random number generator
+    const seededRandom = () => {
+      currentSeed = (currentSeed * 9301 + 49297) % 233280;
+      return currentSeed / 233280;
+    };
+
     for (let i = 0; i < numStars; i++) {
       positions.push({
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        delay: Math.random() * 10,
-        duration: 5 + Math.random() * 12,
-        scale: 0.1 + Math.random() * 0.9,
-        opacity: 0.1 + Math.random() * 0.9,
+        left: seededRandom() * 100,
+        top: seededRandom() * 100,
+        delay: seededRandom() * 10,
+        duration: 5 + seededRandom() * 12,
+        scale: 0.1 + seededRandom() * 0.9,
+        opacity: 0.1 + seededRandom() * 0.9,
       });
     }
 
@@ -30,7 +39,7 @@ export default function StarBackground() {
     <div className='absolute inset-0'>
       {starPositions.map((star, i) => (
         <div
-          key={`star-${Math.random()}-${i}`}
+          key={`star-${i}`}
           className='absolute w-1 h-1 bg-white rounded-full'
           style={{
             left: `${star.left}%`,
