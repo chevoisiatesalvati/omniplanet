@@ -24,3 +24,10 @@ Chain A/B's Oapp:
 zones: {playerId: number} (everytime player mines, increase it by rand(-1,2), -1 because accidents can happen when mining. min is 0)
 
 ---
+
+Complete Game MechanicsOverview: Players (UserA, UserB) compete to reduce each other’s Health (max 5) to 0 by moving to ChainA or ChainB to claim zones (5 per chain, zones += rand(-1,2), min 0). Zones on ChainA determine Attack; zones on ChainB determine Defense. All game state is stored in ChainH’s StarForgeOApp. Players perform one simultaneous action per turn (move and claim zones), updating local zones on ChainA/B and sending updates to ChainH via send() with Composer messages (no lzRead during actions). 
+
+The StarForgeOApp on ChainH (Base testnet) serves as the central hub for all game logic and state, managing player actions, turn progression, and outcome resolution. It receives cross-chain messages from ChainA/B OApps, updates game state, and uses lzRead to finalize turns when both players’ actions are complete, determining Health updates and win conditions.
+
+lzRead to fetch zone counts from ChainA (Attack OApp) and ChainB (Defense OApp), sums zones to determine Attack/Defense, calculates net resources, and updates Health. The game ends when one player’s Health reaches 0, with an ERC-20 reward.
+
