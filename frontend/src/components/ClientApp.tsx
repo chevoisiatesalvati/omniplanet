@@ -1,6 +1,6 @@
 'use client';
 
-import { useIsSignedIn } from '@coinbase/cdp-hooks';
+import { useAccount } from 'wagmi';
 import { useState } from 'react';
 
 import OnboardingScreen from '@/components/OnboardingScreen';
@@ -12,7 +12,7 @@ import Header from '@/components/Header';
  * A component that displays the client app.
  */
 export default function ClientApp() {
-  const { isSignedIn } = useIsSignedIn();
+  const { isConnected } = useAccount();
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [hasShip, setHasShip] = useState(false);
   const [isInGalaxy, setIsInGalaxy] = useState(false);
@@ -36,14 +36,14 @@ export default function ClientApp() {
   return (
     <div className='app flex-col-container flex-grow'>
       <Header />
-      {!isSignedIn && !hasCompletedOnboarding && (
+      {!isConnected && !hasCompletedOnboarding && (
         <OnboardingScreen onComplete={handleOnboardingComplete} />
       )}
 
-      {isSignedIn && !isInGalaxy && (
+      {isConnected && !isInGalaxy && (
         <Cockpit onMintShip={handleMintShip} onDeployShip={handleDeployShip} />
       )}
-      {isSignedIn && isInGalaxy && (
+      {isConnected && isInGalaxy && (
         <Galaxy onBackToCockpit={handleBackToCockpit} />
       )}
     </div>

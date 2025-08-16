@@ -12,7 +12,9 @@ import {
   ChevronRight,
   Play,
 } from 'lucide-react';
-import { AuthButton } from '@coinbase/cdp-react/components/AuthButton';
+import { useAccount } from 'wagmi';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+
 import StarBackground from '@/components/StarBackground';
 
 interface OnboardingScreenProps {
@@ -22,10 +24,17 @@ interface OnboardingScreenProps {
 export default function OnboardingScreen({
   onComplete,
 }: OnboardingScreenProps) {
+  const { isConnected } = useAccount();
   const [currentStep, setCurrentStep] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [displayedText, setDisplayedText] = useState('');
   const [isIntroComplete, setIsIntroComplete] = useState(false);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const steps = [
     {
@@ -85,12 +94,21 @@ export default function OnboardingScreen({
       setCurrentStep(currentStep + 1);
       setIsTyping(false);
       setDisplayedText('');
+    } else {
+      setShowWalletModal(true);
     }
   };
 
   const skipOnboarding = () => {
     setCurrentStep(steps.length - 1);
   };
+
+  // Auto-navigate to cockpit when user connects
+  useEffect(() => {
+    if (isConnected) {
+      onComplete();
+    }
+  }, [isConnected, onComplete]);
 
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-[#0a0a0f] via-[#16213e] to-[#533483] relative overflow-hidden'>
@@ -123,8 +141,8 @@ export default function OnboardingScreen({
           {/* AI Chat Interface */}
           <motion.div
             className='bg-black/40 backdrop-blur-sm border border-cyan-500/30 rounded-2xl p-8 mb-8'
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
             onAnimationComplete={() => setIsIntroComplete(true)}
           >
@@ -225,11 +243,15 @@ export default function OnboardingScreen({
                     </motion.button>
                   ) : (
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
                       transition={{ duration: 0.5 }}
                     >
-                      <AuthButton />
+                      {isMounted ? (
+                        <ConnectButton showBalance={false} chainStatus='full' />
+                      ) : (
+                        <div className='h-10 w-40 rounded-md bg-gray-700' />
+                      )}
                     </motion.div>
                   )}
                 </div>

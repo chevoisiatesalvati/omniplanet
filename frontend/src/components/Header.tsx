@@ -1,7 +1,7 @@
 'use client';
-import { useEvmAddress, useIsInitialized } from '@coinbase/cdp-hooks';
-import { AuthButton } from '@coinbase/cdp-react/components/AuthButton';
 import { useEffect, useState } from 'react';
+import { useAccount } from 'wagmi';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 import { IconCheck, IconCopy, IconUser } from '@/components/Icons';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,14 +10,19 @@ import { Skeleton } from '@/components/ui/skeleton';
  * Header component
  */
 export default function Header() {
-  const { evmAddress } = useEvmAddress();
-  const { isInitialized } = useIsInitialized();
+  const { address, isConnecting, isReconnecting, isConnected, status } =
+    useAccount();
   const [isCopied, setIsCopied] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const copyAddress = async () => {
-    if (!evmAddress) return;
+    if (!address) return;
     try {
-      await navigator.clipboard.writeText(evmAddress);
+      await navigator.clipboard.writeText(address);
       setIsCopied(true);
     } catch (error) {
       console.error(error);
@@ -37,34 +42,18 @@ export default function Header() {
       <div className='header-inner'>
         <h1 className='site-title'>OmniPlanet</h1>
         <div className='user-info flex-row-container'>
-          {!isInitialized ? (
-            <>
-              <Skeleton className='h-14 w-30 rounded-full' />
-            </>
-          ) : (
-            <>
-              {evmAddress && (
-                <button
-                  aria-label='copy wallet address'
-                  className='flex-row-container copy-address-button'
-                  onClick={copyAddress}
-                >
-                  {!isCopied && (
-                    <>
-                      <IconUser className='user-icon user-icon--user' />
-                      <IconCopy className='user-icon user-icon--copy' />
-                    </>
-                  )}
-                  {isCopied && (
-                    <IconCheck className='user-icon user-icon--check' />
-                  )}
-                  <span className='wallet-address'>
-                    {evmAddress.slice(0, 6)}...{evmAddress.slice(-4)}
-                  </span>
-                </button>
-              )}
-              <AuthButton />
-            </>
+          {!isMounted && <Skeleton className='h-10 w-40 rounded-md' />}
+          {isMounted &&
+            (status === 'connecting' || isConnecting || isReconnecting) && (
+              <Skeleton className='h-10 w-40 rounded-md' />
+            )}
+          {isMounted && status === 'disconnected' && (
+            <ConnectButton showBalance={false} chainStatus='icon' />
+          )}
+          {isMounted && isConnected && (
+            <div className='flex-row-container gap-2'>
+              <ConnectButton showBalance={false} chainStatus='full' />
+            </div>
           )}
         </div>
       </div>

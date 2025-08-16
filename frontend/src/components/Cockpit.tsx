@@ -2,6 +2,9 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
+import { useStarship } from '@/hooks/useStarship';
+import { NetworkKey } from '@/config/networks';
+import { useCurrentNetworkKey } from '@/hooks/useCurrentNetwork';
 import {
   Rocket,
   Zap,
@@ -24,12 +27,13 @@ interface CockpitProps {
 export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
   const [isHologramActive, setIsHologramActive] = useState(false);
   const [showMintDialog, setShowMintDialog] = useState(false);
+  const currentNetwork = useCurrentNetworkKey('base-sepolia');
+  const { state, mint, refresh } = useStarship(currentNetwork);
 
   const cockpitVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      scale: 1,
       transition: {
         duration: 1,
         ease: 'easeOut' as const,
@@ -50,9 +54,8 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
   };
 
   const hologramVariants = {
-    hidden: { scale: 0, opacity: 0 },
+    hidden: { opacity: 0 },
     visible: {
-      scale: 1,
       opacity: 1,
       transition: {
         duration: 0.6,
@@ -61,12 +64,18 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
     },
   };
 
-  const handleMintShip = () => {
+  const handleMintShip = async () => {
     setShowMintDialog(true);
-    setTimeout(() => {
+    try {
+      await mint(1n);
+      await refresh();
+      setIsHologramActive(true);
       onMintShip();
+    } catch (e) {
+      // ignore for now
+    } finally {
       setShowMintDialog(false);
-    }, 2000);
+    }
   };
 
   const handleDeployShip = () => {
@@ -118,7 +127,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
           >
             <div className='bg-black/40 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-6 h-full'>
               <AnimatePresence>
-                {!isHologramActive ? (
+                {!isHologramActive && !state.hasShip ? (
                   <motion.div
                     key='inactive'
                     className='h-full flex flex-col justify-between py-20 gap-4'
@@ -141,7 +150,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
                         className='bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 flex items-center mx-auto text-lg'
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => setIsHologramActive(true)}
+                        onClick={handleMintShip}
                       >
                         <Rocket className='mr-3' />
                         Mint a Ship
@@ -226,7 +235,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
           </motion.div>
 
           {/* Deploy Button - Outside the starship container */}
-          {isHologramActive && (
+          {(isHologramActive || state.hasShip) && (
             <motion.div
               className='text-center mb-8'
               initial={{ opacity: 0, y: 20 }}

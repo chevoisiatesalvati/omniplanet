@@ -16,9 +16,11 @@
     "@coinbase/cdp-hooks": "latest",
     "@coinbase/cdp-react": "latest",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@rainbow-me/rainbowkit": "^2.2.8",
     "@react-three/drei": "^10.6.1",
     "@react-three/fiber": "^9.3.0",
     "@tailwindcss/postcss": "^4.1.12",
+    "@tanstack/react-query": "^5.85.3",
     "bufferutil": "^4.0.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -29,7 +31,8 @@
     "react-dom": "^19.1.0",
     "tailwind-merge": "^3.3.1",
     "three": "^0.179.1",
-    "viem": "^2.8.6"
+    "viem": "^2.8.6",
+    "wagmi": "^2.16.3"
   },
   "devDependencies": {
     "@types/node": "^20",

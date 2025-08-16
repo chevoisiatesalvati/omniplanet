@@ -1,26 +1,22 @@
 'use client';
 
-import { type Config } from '@coinbase/cdp-hooks';
-import {
-  CDPReactProvider,
-  type AppConfig,
-} from '@coinbase/cdp-react/components/CDPReactProvider';
-
-import { theme } from '@/components/theme';
+import { WagmiProvider } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { baseSepolia, arbitrumSepolia } from 'wagmi/chains';
 
 interface ProvidersProps {
   children: React.ReactNode;
 }
 
-const CDP_CONFIG: Config = {
-  projectId: process.env.NEXT_PUBLIC_CDP_PROJECT_ID ?? '',
-};
+const wagmiConfig = getDefaultConfig({
+  appName: 'OmniPlanet',
+  projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID ?? '',
+  chains: [baseSepolia, arbitrumSepolia],
+  ssr: true,
+});
 
-const APP_CONFIG: AppConfig = {
-  name: 'OmniPlanet',
-  logoUrl: 'http://localhost:3000/logo.svg',
-  authMethods: ['email', 'sms'],
-};
+const queryClient = new QueryClient();
 
 /**
  * Providers component that wraps the application in all requisite providers
@@ -31,8 +27,10 @@ const APP_CONFIG: AppConfig = {
  */
 export default function Providers({ children }: ProvidersProps) {
   return (
-    <CDPReactProvider config={CDP_CONFIG} app={APP_CONFIG} theme={theme}>
-      {children}
-    </CDPReactProvider>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <RainbowKitProvider>{children}</RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }

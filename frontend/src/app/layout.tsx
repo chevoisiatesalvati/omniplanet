@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Orbitron } from 'next/font/google';
+import '@rainbow-me/rainbowkit/styles.css';
+import Providers from '@/components/Providers';
 
 const orbitron = Orbitron({
   subsets: ['latin'],
@@ -29,7 +31,9 @@ export default function RootLayout({
   return (
     <html lang='en' className={orbitron.variable}>
       <body>
-        <div className='root'>{children}</div>
+        <div className='root'>
+          <Providers>{children}</Providers>
+        </div>
       </body>
     </html>
   );

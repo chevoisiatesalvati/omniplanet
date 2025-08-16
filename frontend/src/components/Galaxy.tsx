@@ -12,6 +12,9 @@ import {
 } from '@react-three/drei';
 import { Vector3 } from 'three';
 import { ArrowLeft, Heart, Navigation, Shield, Zap } from 'lucide-react';
+import { PLANET_TO_NETWORK, type NetworkKey } from '@/config/networks';
+import { useStarship } from '@/hooks/useStarship';
+import { useCurrentNetworkKey } from '@/hooks/useCurrentNetwork';
 
 interface GalaxyProps {
   onBackToCockpit: () => void;
@@ -152,6 +155,8 @@ function Planet({
 }
 
 export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
+  const currentNetwork = useCurrentNetworkKey('base-sepolia');
+  const { state, travel } = useStarship(currentNetwork);
   const planets: PlanetDescriptor[] = [
     {
       id: 1,
@@ -342,6 +347,16 @@ export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`mt-4 w-full bg-gradient-to-r ${selected.accent} text-white py-2.5 px-4 rounded-lg font-semibold`}
+            onClick={async () => {
+              if (!state.tokenId) return;
+              const destination =
+                PLANET_TO_NETWORK[selected.name] ?? 'base-sepolia';
+              try {
+                await travel({ destination, tokenId: state.tokenId });
+              } catch (e) {
+                // ignore for now
+              }
+            }}
           >
             Travel and Mine
           </motion.button>
