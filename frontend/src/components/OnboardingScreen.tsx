@@ -92,28 +92,6 @@ export default function OnboardingScreen({
 
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-[#0a0a0f] via-[#16213e] to-[#533483] relative overflow-hidden'>
-      {/* Animated star background */}
-      <div className='absolute inset-0'>
-        {[...Array(150)].map((_, i) => (
-          <motion.div
-            key={i}
-            className='absolute w-1 h-1 bg-white rounded-full'
-            style={{
-              left: `${(i * 7.3) % 100}%`,
-              top: `${(i * 3.7) % 100}%`,
-            }}
-            animate={{
-              opacity: [0.3, 1, 0.3],
-              scale: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: 3 + (i % 3),
-              repeat: Infinity,
-              delay: (i * 0.1) % 3,
-            }}
-          />
-        ))}
-      </div>
 
       {/* Main content */}
       <div className='relative z-10 flex items-center justify-center min-h-screen p-8'>
