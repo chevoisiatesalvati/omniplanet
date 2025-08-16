@@ -12,9 +12,6 @@
     "lint:fix": "next lint --fix"
   },
   "dependencies": {
-    "@coinbase/cdp-core": "latest",
-    "@coinbase/cdp-hooks": "latest",
-    "@coinbase/cdp-react": "latest",
     "@radix-ui/react-dialog": "^1.1.15",
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@react-three/drei": "^10.6.1",

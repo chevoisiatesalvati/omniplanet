@@ -27,16 +27,16 @@ export const NETWORKS: Record<NetworkKey, NetworkConfigItem> = {
     networkKey: 'base-sepolia',
     rpcUrl: 'https://sepolia.base.org',
     contractAddress: CONTRACT_ADDRESSES['base-sepolia'],
-    // TODO: ask for correct LZ v2 EID for Base Sepolia and fill here
-    lzEid: undefined,
+    // LayerZero v2 EID for Base Sepolia testnet
+    lzEid: 40245,
   },
   'arbitrum-sepolia': {
     chainId: 421614,
     networkKey: 'arbitrum-sepolia',
     rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
     contractAddress: CONTRACT_ADDRESSES['arbitrum-sepolia'],
-    // TODO: ask for correct LZ v2 EID for Arbitrum Sepolia and fill here
-    lzEid: undefined,
+    // LayerZero v2 EID for Arbitrum Sepolia testnet
+    lzEid: 40231,
   },
 };
 

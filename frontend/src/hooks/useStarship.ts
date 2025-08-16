@@ -46,10 +46,7 @@ export function useStarship(network: NetworkKey) {
 
   const mint = async (amount: bigint = 1n) => {
     if (!address) throw new Error('No wallet');
-    console.log('minting', address, amount);
-    console.log('contract', contract);
     const tx = await contract.mint(address as Address, amount);
-    console.log('mint tx', tx);
     return tx;
   };
 
@@ -61,19 +58,26 @@ export function useStarship(network: NetworkKey) {
     const dst = NETWORKS[params.destination];
     if (!dst.lzEid) throw new Error('Missing LayerZero EID for destination');
     const to = toBytes32(address as Address);
-    const msgFee = await contract.quoteSend({
-      dstEid: dst.lzEid,
-      toAddressBytes32: to,
-      tokenId: params.tokenId,
-    });
-    const tx = await contract.send({
-      dstEid: dst.lzEid,
-      toAddressBytes32: to,
-      tokenId: params.tokenId,
-      feeNative: msgFee.nativeFee,
-      refundAddress: address as Address,
-    });
-    return tx;
+
+    try {
+      const msgFee = await contract.quoteSend({
+        dstEid: dst.lzEid,
+        toAddressBytes32: to,
+        tokenId: params.tokenId,
+      });
+
+      const tx = await contract.send({
+        dstEid: dst.lzEid,
+        toAddressBytes32: to,
+        tokenId: params.tokenId,
+        feeNative: msgFee.nativeFee,
+        refundAddress: address as Address,
+      });
+      return tx;
+    } catch (error) {
+      console.error('Travel error:', error);
+      throw error;
+    }
   };
 
   return {
