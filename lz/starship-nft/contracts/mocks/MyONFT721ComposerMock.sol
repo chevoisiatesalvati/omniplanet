@@ -5,8 +5,10 @@ import { IOAppComposer } from "@layerzerolabs/oapp-evm/contracts/oapp/interfaces
 import { OApp, Origin, MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import { OAppOptionsType3 } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 
-contract ONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
+
+contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
     // default empty values for testing a lzCompose received message
     address public from;
     bytes32 public guid;
@@ -19,6 +21,9 @@ contract ONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
 
     /// @notice Msg type for sending a string, for use in OAppOptionsType3 as an enforced option
     uint16 public constant SEND = 1;
+
+    using OptionsBuilder for bytes;
+
 
     /// @notice Initialize with Endpoint V2 and owner address
     /// @param _endpoint The local chain's LayerZero Endpoint V2 address
@@ -63,7 +68,7 @@ contract ONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
     /// @param _dstEid   Destination Endpoint ID (uint32)
     /// @param _string  The string to send
     /// @param _options  Execution options for gas on the destination (bytes)
-    function sendString(uint32 _dstEid, string calldata _string, bytes calldata _options) external payable {
+    function sendString(uint32 _dstEid, string calldata _string, bytes calldata _options) public payable {
         // 1. (Optional) Update any local state here.
         //    e.g., record that a message was "sent":
         //    sentCount += 1;
@@ -138,5 +143,25 @@ contract ONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
         message = _message;
         executor = _executor;
         extraData = _message;
+
+
+        bytes memory options = OptionsBuilder.newOptions()
+            .addExecutorLzReceiveOption(300000, 0)
+            .toBytes();
+
+        // Get fee estimate first
+        MessagingFee memory fee = quoteSendString(
+            40,
+            "Hello World",
+            options,
+            false  // pay in native gas
+        );
+
+        // Then send with the estimated fee
+        sendString{value: fee.nativeFee}(
+            dstEid, // TODO: hardcode for now
+            "Hello World",
+            options
+        );
     }
 }
