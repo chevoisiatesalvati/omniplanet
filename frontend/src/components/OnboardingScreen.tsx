@@ -13,7 +13,7 @@ import {
   Play,
 } from 'lucide-react';
 import { useAccount } from 'wagmi';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import CustomConnectButton from './CustomConnectButton';
 
 import StarBackground from '@/components/StarBackground';
 
@@ -248,7 +248,10 @@ export default function OnboardingScreen({
                       transition={{ duration: 0.5 }}
                     >
                       {isMounted ? (
-                        <ConnectButton showBalance={false} chainStatus='full' />
+                        <CustomConnectButton
+                          showBalance={false}
+                          chainStatus='full'
+                        />
                       ) : (
                         <div className='h-10 w-40 rounded-md bg-gray-700' />
                       )}

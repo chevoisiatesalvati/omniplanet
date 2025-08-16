@@ -1,10 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 import { IconCheck, IconCopy, IconUser } from '@/components/Icons';
 import { Skeleton } from '@/components/ui/skeleton';
+import CustomConnectButton from './CustomConnectButton';
 
 /**
  * Header component
@@ -45,14 +45,14 @@ export default function Header() {
           {!isMounted && <Skeleton className='h-10 w-40 rounded-md' />}
           {isMounted &&
             (status === 'connecting' || isConnecting || isReconnecting) && (
-              <Skeleton className='h-10 w-40 rounded-md' />
+              <CustomConnectButton showBalance={false} chainStatus='icon' />
             )}
           {isMounted && status === 'disconnected' && (
-            <ConnectButton showBalance={false} chainStatus='icon' />
+            <CustomConnectButton showBalance={false} chainStatus='icon' />
           )}
           {isMounted && isConnected && (
             <div className='flex-row-container gap-2'>
-              <ConnectButton showBalance={false} chainStatus='full' />
+              <CustomConnectButton showBalance={false} chainStatus='full' />
             </div>
           )}
         </div>
