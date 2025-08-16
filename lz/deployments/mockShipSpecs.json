@@ -1,0 +1,108 @@
+{
+  "compiler": {
+   "version": "0.8.24+commit.e11b9ed9"
+  },
+  "language": "Solidity",
+  "output": {
+   "abi": [
+    {
+     "inputs": [],
+     "stateMutability": "nonpayable",
+     "type": "constructor"
+    },
+    {
+     "inputs": [
+      {
+       "internalType": "uint256",
+       "name": "",
+       "type": "uint256"
+      }
+     ],
+     "name": "players",
+     "outputs": [
+      {
+       "internalType": "uint256",
+       "name": "health",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "attack",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "defense",
+       "type": "uint256"
+      }
+     ],
+     "stateMutability": "view",
+     "type": "function"
+    },
+    {
+     "inputs": [
+      {
+       "internalType": "uint256",
+       "name": "playerId",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "health",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "attack",
+       "type": "uint256"
+      },
+      {
+       "internalType": "uint256",
+       "name": "defense",
+       "type": "uint256"
+      }
+     ],
+     "name": "updateStats",
+     "outputs": [],
+     "stateMutability": "nonpayable",
+     "type": "function"
+    }
+   ],
+   "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+   },
+   "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+   }
+  },
+  "settings": {
+   "compilationTarget": {
+    "PlayerStat.sol": "PlayerStat"
+   },
+   "evmVersion": "cancun",
+   "libraries": {},
+   "metadata": {
+    "bytecodeHash": "ipfs"
+   },
+   "optimizer": {
+    "enabled": false,
+    "runs": 200
+   },
+   "remappings": []
+  },
+  "sources": {
+   "PlayerStat.sol": {
+    "keccak256": "0x873dc6e254cbe303ec486de616db6298d13f67291566f21aef90d4178db7bea2",
+    "license": "MIT",
+    "urls": [
+     "bzz-raw://8f2dc975b8dfa264dd68f7ae13647951752d59d2935f0d9e2288c685bc7d5841",
+     "dweb:/ipfs/Qmdai5z3V4F3KDUgcfiihkdD2bb6qAXHtUFjgyGNWrEfbo"
+    ]
+   }
+  },
+  "version": 1
+ }

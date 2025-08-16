@@ -21,6 +21,10 @@ export const CONTRACT_ADDRESSES: Record<NetworkKey, `0x${string}`> = {
   'arbitrum-sepolia': '0x037B44B33E41D5AdFBbC43A3d67f32b5b9876B99',
 };
 
+// Ship specs contract address (PlayerStat contract) - deployed only on arbitrum-sepolia as hub
+export const SHIP_SPECS_ADDRESS =
+  '0x6758d41f52B9047bc05F7F882e35634e3a3A0Fa9' as const;
+
 export const NETWORKS: Record<NetworkKey, NetworkConfigItem> = {
   'base-sepolia': {
     chainId: 84532,

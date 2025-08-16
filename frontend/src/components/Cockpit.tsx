@@ -3,13 +3,13 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { useStarship } from '@/hooks/useStarship';
+import { useShipSpecs } from '@/hooks/useShipSpecs';
 import { useCurrentNetworkKey } from '@/hooks/useCurrentNetwork';
 import {
   Rocket,
   Zap,
   Shield,
   Heart,
-  Target,
   Globe,
   Star,
   Sparkles,
@@ -27,6 +27,10 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
   const [showMintDialog, setShowMintDialog] = useState(false);
   const currentNetwork = useCurrentNetworkKey('base-sepolia');
   const { state, mint, refresh } = useStarship(currentNetwork);
+  const { state: shipSpecsState, refresh: refreshShipSpecs } = useShipSpecs(
+    currentNetwork,
+    state.tokenId || 1n
+  );
 
   const cockpitVariants = {
     hidden: { opacity: 0 },
@@ -67,6 +71,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
     try {
       await mint(1n);
       await refresh();
+      await refreshShipSpecs();
       setIsHologramActive(true);
       onMintShip();
     } catch (e) {
@@ -175,51 +180,59 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
                           Starship Specs
                         </h3>
                         <div className='space-y-4'>
-                          <div className='flex justify-between items-center'>
-                            <div className='flex items-center'>
-                              <Zap className='w-5 h-5 text-yellow-400 mr-2' />
-                              <span className='text-white'>Attack</span>
+                          {shipSpecsState.isLoading ? (
+                            <div className='text-center py-4'>
+                              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto'></div>
+                              <p className='text-cyan-200 mt-2'>
+                                Loading specs...
+                              </p>
                             </div>
-                            <span className='text-yellow-400 font-semibold'>
-                              10
-                            </span>
-                          </div>
-                          <div className='flex justify-between items-center'>
-                            <div className='flex items-center'>
-                              <Shield className='w-5 h-5 text-blue-400 mr-2' />
-                              <span className='text-white'>Defense</span>
+                          ) : shipSpecsState.error ? (
+                            <div className='text-center py-4'>
+                              <p className='text-red-400'>
+                                Error loading specs
+                              </p>
+                              <p className='text-red-300 text-sm'>
+                                {shipSpecsState.error}
+                              </p>
                             </div>
-                            <span className='text-blue-400 font-semibold'>
-                              10
-                            </span>
-                          </div>
-                          <div className='flex justify-between items-center'>
-                            <div className='flex items-center'>
-                              <Heart className='w-5 h-5 text-red-400 mr-2' />
-                              <span className='text-white'>Health</span>
+                          ) : shipSpecsState.specs ? (
+                            <>
+                              <div className='flex justify-between items-center'>
+                                <div className='flex items-center'>
+                                  <Zap className='w-5 h-5 text-yellow-400 mr-2' />
+                                  <span className='text-white'>Attack</span>
+                                </div>
+                                <span className='text-yellow-400 font-semibold'>
+                                  {Number(shipSpecsState.specs.attack)}
+                                </span>
+                              </div>
+                              <div className='flex justify-between items-center'>
+                                <div className='flex items-center'>
+                                  <Shield className='w-5 h-5 text-blue-400 mr-2' />
+                                  <span className='text-white'>Defense</span>
+                                </div>
+                                <span className='text-blue-400 font-semibold'>
+                                  {Number(shipSpecsState.specs.defense)}
+                                </span>
+                              </div>
+                              <div className='flex justify-between items-center'>
+                                <div className='flex items-center'>
+                                  <Heart className='w-5 h-5 text-red-400 mr-2' />
+                                  <span className='text-white'>Health</span>
+                                </div>
+                                <span className='text-red-400 font-semibold'>
+                                  {Number(shipSpecsState.specs.health)}
+                                </span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className='text-center py-4'>
+                              <p className='text-gray-400'>
+                                No specs available
+                              </p>
                             </div>
-                            <span className='text-red-400 font-semibold'>
-                              100
-                            </span>
-                          </div>
-                          <div className='flex justify-between items-center'>
-                            <div className='flex items-center'>
-                              <Target className='w-5 h-5 text-green-400 mr-2' />
-                              <span className='text-white'>Speed</span>
-                            </div>
-                            <span className='text-green-400 font-semibold'>
-                              85
-                            </span>
-                          </div>
-                          <div className='flex justify-between items-center'>
-                            <div className='flex items-center'>
-                              <Star className='w-5 h-5 text-purple-400 mr-2' />
-                              <span className='text-white'>Energy</span>
-                            </div>
-                            <span className='text-purple-400 font-semibold'>
-                              75
-                            </span>
-                          </div>
+                          )}
                         </div>
                       </div>
 
