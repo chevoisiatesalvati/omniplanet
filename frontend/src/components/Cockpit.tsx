@@ -131,23 +131,27 @@ export default function Cockpit({ onMintShip }: CockpitProps) {
                 {!isHologramActive ? (
                   <motion.div
                     key="inactive"
-                    className="text-center py-20"
+                    className="h-full flex flex-col justify-between py-20"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <Globe className="w-24 h-24 text-purple-400 mx-auto mb-6" />
-                    <h2 className="text-3xl font-bold text-white mb-4">No Starship Detected</h2>
-                    <p className="text-xl text-blue-200 mb-8">Mint your first starship to begin your space commander journey</p>
-                    <motion.button
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center mx-auto text-lg"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setIsHologramActive(true)}
-                    >
-                      <Rocket className="mr-3" />
-                      Mint a Ship
-                    </motion.button>
+                    <div className="text-center">
+                      <Globe className="w-24 h-24 text-purple-400 mx-auto mb-6" />
+                      <h2 className="text-3xl font-bold text-white mb-4">No Starship Detected</h2>
+                      <p className="text-xl text-blue-200">Mint your first starship to begin your space commander journey</p>
+                    </div>
+                    <div className="text-center">
+                      <motion.button
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center mx-auto text-lg"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setIsHologramActive(true)}
+                      >
+                        <Rocket className="mr-3" />
+                        Mint a Ship
+                      </motion.button>
+                    </div>
                   </motion.div>
                 ) : (
                   <motion.div
@@ -208,9 +212,7 @@ export default function Cockpit({ onMintShip }: CockpitProps) {
                       </div>
 
                       {/* Starship 3D Render - Right Side */}
-                      <div className="flex-1 min-h-96">
                         <Starship3D />
-                      </div>
                     </div>
                   </motion.div>
                 )}

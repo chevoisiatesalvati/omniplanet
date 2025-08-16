@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CDP Next.js StarterKit",
-  description: "The CDP Next.js StarterKit",
+  title: "OmniPlanet - Space Commander Terminal",
+  description: "Mint and command your starship in the OmniPlanet universe. A space commander terminal for NFT starship collection and management.",
 };
 
 /**
