@@ -1,12 +1,13 @@
-"use client";
+'use client';
 
-import { useIsInitialized, useIsSignedIn } from "@coinbase/cdp-hooks";
-import { useState } from "react";
+import { useIsInitialized, useIsSignedIn } from '@coinbase/cdp-hooks';
+import { useState } from 'react';
 
-import Loading from "@/components/Loading";
-import OnboardingScreen from "@/components/OnboardingScreen";
-import Cockpit from "@/components/Cockpit";
-import Galaxy from "@/components/Galaxy";
+import Loading from '@/components/Loading';
+import OnboardingScreen from '@/components/OnboardingScreen';
+import Cockpit from '@/components/Cockpit';
+import Galaxy from '@/components/Galaxy';
+import Header from '@/components/Header';
 
 /**
  * A component that displays the client app.
@@ -35,7 +36,8 @@ export default function ClientApp() {
   };
 
   return (
-    <div className="app flex-col-container flex-grow">
+    <div className='app flex-col-container flex-grow'>
+      <Header />
       {!isInitialized && <Loading />}
       {isInitialized && (
         <>
@@ -43,15 +45,15 @@ export default function ClientApp() {
             <OnboardingScreen onComplete={handleOnboardingComplete} />
           )}
 
-                      {isSignedIn && !isInGalaxy && (
-              <Cockpit 
-                onMintShip={handleMintShip} 
-                onDeployShip={handleDeployShip}
-              />
-            )}
-            {isSignedIn && isInGalaxy && (
-              <Galaxy onBackToCockpit={handleBackToCockpit} />
-            )}
+          {isSignedIn && !isInGalaxy && (
+            <Cockpit
+              onMintShip={handleMintShip}
+              onDeployShip={handleDeployShip}
+            />
+          )}
+          {isSignedIn && isInGalaxy && (
+            <Galaxy onBackToCockpit={handleBackToCockpit} />
+          )}
         </>
       )}
     </div>

@@ -1,22 +1,25 @@
-"use client";
+'use client';
 
-import { type Config } from "@coinbase/cdp-hooks";
-import { CDPReactProvider, type AppConfig } from "@coinbase/cdp-react/components/CDPReactProvider";
+import { type Config } from '@coinbase/cdp-hooks';
+import {
+  CDPReactProvider,
+  type AppConfig,
+} from '@coinbase/cdp-react/components/CDPReactProvider';
 
-import { theme } from "@/components/theme";
+import { theme } from '@/components/theme';
 
 interface ProvidersProps {
   children: React.ReactNode;
 }
 
 const CDP_CONFIG: Config = {
-  projectId: process.env.NEXT_PUBLIC_CDP_PROJECT_ID ?? "",
+  projectId: process.env.NEXT_PUBLIC_CDP_PROJECT_ID ?? '',
 };
 
 const APP_CONFIG: AppConfig = {
-  name: "OmniPlanet",
-  logoUrl: "http://localhost:3000/logo.svg",
-  authMethods: ["email", "sms"],
+  name: 'OmniPlanet',
+  logoUrl: 'http://localhost:3000/logo.svg',
+  authMethods: ['email', 'sms'],
 };
 
 /**

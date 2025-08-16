@@ -1,6 +1,6 @@
-"use client";
-import ClientApp from "@/components/ClientApp";
-import Providers from "@/components/Providers";
+'use client';
+import ClientApp from '@/components/ClientApp';
+import Providers from '@/components/Providers';
 
 /**
  * Home page for the Next.js app

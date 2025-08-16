@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "OmniPlanet - Space Commander Terminal",
-  description: "Mint and command your starship in the OmniPlanet universe. A space commander terminal for NFT starship collection and management.",
+  title: 'OmniPlanet - Space Commander Terminal',
+  description:
+    'Mint and command your starship in the OmniPlanet universe. A space commander terminal for NFT starship collection and management.',
 };
 
 /**
@@ -13,11 +14,15 @@ export const metadata: Metadata = {
  * @param props.children - { React.ReactNode } - The children to wrap
  * @returns The wrapped children
  */
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
+    <html lang='en'>
       <body>
-        <div className="root">{children}</div>
+        <div className='root'>{children}</div>
       </body>
     </html>
   );
