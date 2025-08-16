@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { useStarship } from '@/hooks/useStarship';
-import { NetworkKey } from '@/config/networks';
 import { useCurrentNetworkKey } from '@/hooks/useCurrentNetwork';
 import {
   Rocket,
@@ -13,7 +12,6 @@ import {
   Target,
   Globe,
   Star,
-  Play,
   Sparkles,
 } from 'lucide-react';
 import Starship3D from './Starship3D';
@@ -248,8 +246,8 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
                 whileTap={{ scale: 0.95 }}
                 onClick={handleDeployShip}
               >
-                <Play className='mr-3' />
-                Deploy Starship
+                <Rocket className='mr-3' />
+                Go into the Galaxy
               </motion.button>
             </motion.div>
           )}

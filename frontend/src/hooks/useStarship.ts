@@ -10,31 +10,184 @@ export interface StarshipState {
   tokenUri?: string;
   isLoading: boolean;
   error?: string;
+  // Add multi-chain balance information
+  balances: Record<NetworkKey, { balance: bigint; tokenIds: bigint[] }>;
 }
 
 export function useStarship(network: NetworkKey) {
   const { address } = useAccount();
   const contract = useStarshipContract(network);
+
+  // Create contracts for all networks
+  const arbitrumContract = useStarshipContract('arbitrum-sepolia');
+  const baseContract = useStarshipContract('base-sepolia');
+
   const [state, setState] = useState<StarshipState>({
     hasShip: false,
     isLoading: false,
+    balances: {
+      'arbitrum-sepolia': { balance: 0n, tokenIds: [] },
+      'base-sepolia': { balance: 0n, tokenIds: [] },
+    },
   });
 
   const refresh = async () => {
-    if (!address) return setState(s => ({ ...s, hasShip: false }));
+    if (!address) {
+      return setState(s => ({
+        ...s,
+        hasShip: false,
+        balances: {
+          'arbitrum-sepolia': { balance: 0n, tokenIds: [] },
+          'base-sepolia': { balance: 0n, tokenIds: [] },
+        },
+      }));
+    }
+
     setState(s => ({ ...s, isLoading: true }));
+
     try {
-      const bal = await contract.readBalanceOf(address as Address);
-      const hasShip = bal > 0n;
-      // For now assume tokenId = 1 for first ship minted
-      const tokenId = hasShip ? 1n : undefined;
-      const tokenUri = tokenId ? await contract.tokenURI(tokenId) : undefined;
-      setState({ hasShip, tokenId, tokenUri, isLoading: false });
+      // Fetch balances from all implemented chains
+      const balancePromises = [
+        (async () => {
+          try {
+            const balance = await arbitrumContract.readBalanceOf(
+              address as Address
+            );
+
+            // If balance > 0, fetch token IDs
+            const tokenIds: bigint[] = [];
+            if (balance > 0n) {
+              // For now, we'll check token IDs 1-10 (adjust range as needed)
+              for (let i = 1; i <= 10; i++) {
+                try {
+                  const tokenId = BigInt(i);
+                  const owner = await arbitrumContract.ownerOf(tokenId);
+                  if (owner.toLowerCase() === address.toLowerCase()) {
+                    tokenIds.push(tokenId);
+                  }
+                } catch (error) {
+                  // Token doesn't exist or other error, continue to next
+                  break;
+                }
+              }
+            }
+
+            return {
+              network: 'arbitrum-sepolia' as NetworkKey,
+              balance,
+              tokenIds,
+            };
+          } catch (error) {
+            console.error(
+              '[useStarship] Error fetching balance from arbitrum-sepolia:',
+              error
+            );
+            return {
+              network: 'arbitrum-sepolia' as NetworkKey,
+              balance: 0n,
+              tokenIds: [],
+            };
+          }
+        })(),
+        (async () => {
+          try {
+            const balance = await baseContract.readBalanceOf(
+              address as Address
+            );
+
+            // If balance > 0, fetch token IDs
+            const tokenIds: bigint[] = [];
+            if (balance > 0n) {
+              // For now, we'll check token IDs 1-10 (adjust range as needed)
+              for (let i = 1; i <= 10; i++) {
+                try {
+                  const tokenId = BigInt(i);
+                  const owner = await baseContract.ownerOf(tokenId);
+                  if (owner.toLowerCase() === address.toLowerCase()) {
+                    tokenIds.push(tokenId);
+                  }
+                } catch (error) {
+                  // Token doesn't exist or other error, continue to next
+                  break;
+                }
+              }
+            }
+
+            return { network: 'base-sepolia' as NetworkKey, balance, tokenIds };
+          } catch (error) {
+            console.error(
+              '[useStarship] Error fetching balance from base-sepolia:',
+              error
+            );
+            return {
+              network: 'base-sepolia' as NetworkKey,
+              balance: 0n,
+              tokenIds: [],
+            };
+          }
+        })(),
+      ];
+
+      const results = await Promise.all(balancePromises);
+
+      // Update balances state
+      const newBalances: Record<
+        NetworkKey,
+        { balance: bigint; tokenIds: bigint[] }
+      > = {
+        'arbitrum-sepolia': { balance: 0n, tokenIds: [] },
+        'base-sepolia': { balance: 0n, tokenIds: [] },
+      };
+
+      results.forEach(({ network, balance, tokenIds }) => {
+        newBalances[network] = { balance, tokenIds };
+      });
+
+      // Check if user has any ships across all chains
+      const totalBalance = results.reduce(
+        (sum, { balance }) => sum + balance,
+        0n
+      );
+      const hasShip = totalBalance > 0n;
+
+      // For now, use the first available token from any chain
+      let tokenId: bigint | undefined;
+      let tokenUri: string | undefined;
+
+      for (const { network, tokenIds } of results) {
+        if (tokenIds.length > 0) {
+          tokenId = tokenIds[0];
+          try {
+            const networkContract =
+              network === 'arbitrum-sepolia' ? arbitrumContract : baseContract;
+            tokenUri = await networkContract.tokenURI(tokenId);
+            break;
+          } catch (error) {
+            console.error(
+              `[useStarship] Error fetching token URI for ${tokenId} on ${network}:`,
+              error
+            );
+          }
+        }
+      }
+
+      setState({
+        hasShip,
+        tokenId,
+        tokenUri,
+        isLoading: false,
+        balances: newBalances,
+      });
     } catch (e: any) {
+      console.error('[useStarship] Error in refresh:', e);
       setState({
         hasShip: false,
         isLoading: false,
         error: e?.message ?? 'Error',
+        balances: {
+          'arbitrum-sepolia': { balance: 0n, tokenIds: [] },
+          'base-sepolia': { balance: 0n, tokenIds: [] },
+        },
       });
     }
   };
