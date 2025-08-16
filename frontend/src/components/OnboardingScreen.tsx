@@ -13,6 +13,7 @@ import {
   Play,
 } from 'lucide-react';
 import { AuthButton } from '@coinbase/cdp-react/components/AuthButton';
+import StarBackground from '@/components/StarBackground';
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -24,6 +25,7 @@ export default function OnboardingScreen({
   const [currentStep, setCurrentStep] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [displayedText, setDisplayedText] = useState('');
+  const [isIntroComplete, setIsIntroComplete] = useState(false);
 
   const steps = [
     {
@@ -92,7 +94,7 @@ export default function OnboardingScreen({
 
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-[#0a0a0f] via-[#16213e] to-[#533483] relative overflow-hidden'>
-
+      <StarBackground />
       {/* Main content */}
       <div className='relative z-10 flex items-center justify-center min-h-screen p-8'>
         <div className='w-full max-w-4xl'>
@@ -124,6 +126,7 @@ export default function OnboardingScreen({
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
+            onAnimationComplete={() => setIsIntroComplete(true)}
           >
             <div className='flex items-start space-x-4'>
               {/* AI Avatar */}
@@ -170,59 +173,69 @@ export default function OnboardingScreen({
           </motion.div>
 
           {/* Navigation */}
-          <div className='flex justify-between items-center'>
-            {currentStep < steps.length - 1 && (
-              <motion.button
-                className='text-cyan-300 hover:text-cyan-100 transition-colors duration-300 flex items-center'
-                onClick={skipOnboarding}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+          <AnimatePresence>
+            {isIntroComplete && (
+              <motion.div
+                className='flex justify-between items-center'
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 12 }}
+                transition={{ duration: 0.4 }}
               >
-                <Play className='w-4 h-4 mr-2' />
-                Skip Tutorial
-              </motion.button>
+                {currentStep < steps.length - 1 && (
+                  <motion.button
+                    className='text-cyan-300 hover:text-cyan-100 transition-colors duration-300 flex items-center'
+                    onClick={skipOnboarding}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Play className='w-4 h-4 mr-2' />
+                    Skip Tutorial
+                  </motion.button>
+                )}
+                {currentStep === steps.length - 1 && <div></div>}
+
+                <div className='flex items-center space-x-4'>
+                  {/* Step indicators */}
+                  <div className='flex space-x-2'>
+                    {steps.map((_, index) => (
+                      <motion.div
+                        key={index}
+                        className={`w-3 h-3 rounded-full ${
+                          index === currentStep ? 'bg-cyan-400' : 'bg-gray-600'
+                        }`}
+                        animate={{
+                          scale: index === currentStep ? 1.2 : 1,
+                        }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Next button */}
+                  {currentStep < steps.length - 1 ? (
+                    <motion.button
+                      className='bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all duration-300 flex items-center'
+                      onClick={nextStep}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Next
+                      <ChevronRight className='w-4 h-4 ml-2' />
+                    </motion.button>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <AuthButton />
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
             )}
-            {currentStep === steps.length - 1 && <div></div>}
-
-            <div className='flex items-center space-x-4'>
-              {/* Step indicators */}
-              <div className='flex space-x-2'>
-                {steps.map((_, index) => (
-                  <motion.div
-                    key={index}
-                    className={`w-3 h-3 rounded-full ${
-                      index === currentStep ? 'bg-cyan-400' : 'bg-gray-600'
-                    }`}
-                    animate={{
-                      scale: index === currentStep ? 1.2 : 1,
-                    }}
-                    transition={{ duration: 0.3 }}
-                  />
-                ))}
-              </div>
-
-              {/* Next button */}
-              {currentStep < steps.length - 1 ? (
-                <motion.button
-                  className='bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-cyan-600 hover:to-blue-600 transition-all duration-300 flex items-center'
-                  onClick={nextStep}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Next
-                  <ChevronRight className='w-4 h-4 ml-2' />
-                </motion.button>
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <AuthButton />
-                </motion.div>
-              )}
-            </div>
-          </div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

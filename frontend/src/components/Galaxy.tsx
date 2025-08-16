@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   Target,
 } from 'lucide-react';
+import StarBackground from './StarBackground';
 
 interface GalaxyProps {
   onBackToCockpit: () => void;
@@ -62,24 +63,7 @@ export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
 
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-[#0a0a0f] via-[#16213e] to-[#533483] relative overflow-hidden'>
-      {/* Star background */}
-      <div className='absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#16213e] to-[#533483]'>
-        <div className='absolute inset-0 opacity-30'>
-          {[...Array(100)].map((_, i) => (
-            <div
-              key={i}
-              className='absolute w-1 h-1 bg-white rounded-full animate-pulse'
-              style={{
-                left: `${(i * 7.3) % 100}%`,
-                top: `${(i * 3.7) % 100}%`,
-                animationDelay: `${(i * 0.1) % 3}s`,
-                animationDuration: `${2 + (i % 2)}s`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
+      <StarBackground />
       {/* Main content */}
       <div className='relative z-10 min-h-screen p-8'>
         <motion.div
