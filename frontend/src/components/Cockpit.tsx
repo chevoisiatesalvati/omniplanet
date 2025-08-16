@@ -17,9 +17,10 @@ import Starship3D from "./Starship3D";
 
 interface CockpitProps {
   onMintShip: () => void;
+  onDeployShip?: () => void;
 }
 
-export default function Cockpit({ onMintShip }: CockpitProps) {
+export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
   const [isHologramActive, setIsHologramActive] = useState(false);
   const [showMintDialog, setShowMintDialog] = useState(false);
 
@@ -67,10 +68,16 @@ export default function Cockpit({ onMintShip }: CockpitProps) {
     }, 2000);
   };
 
+  const handleDeployShip = () => {
+    if (onDeployShip) {
+      onDeployShip();
+    }
+  };
+
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0a0a0f] via-[#16213e] to-[#533483] relative overflow-hidden">
       {/* Simple star background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#16213e] to-[#533483]">
         <div className="absolute inset-0 opacity-30">
           {[...Array(100)].map((_, i) => (
             <div
@@ -106,16 +113,16 @@ export default function Cockpit({ onMintShip }: CockpitProps) {
               className="text-6xl font-bold text-white mb-4"
               animate={{ 
                 textShadow: [
-                  "0 0 20px rgba(59, 130, 246, 0.5)",
-                  "0 0 40px rgba(59, 130, 246, 0.8)",
-                  "0 0 20px rgba(59, 130, 246, 0.5)"
+                  "0 0 20px rgba(0, 212, 255, 0.5)",
+                  "0 0 40px rgba(0, 212, 255, 0.8)",
+                  "0 0 20px rgba(0, 212, 255, 0.5)"
                 ]
               }}
               transition={{ duration: 2, repeat: Infinity }}
             >
               OMNIPLANET
             </motion.h1>
-            <p className="text-xl text-blue-200">Space Commander Terminal</p>
+            <p className="text-xl text-cyan-200">Space Commander Terminal</p>
           </motion.div>
 
           {/* Main Starship Display */}
@@ -126,7 +133,7 @@ export default function Cockpit({ onMintShip }: CockpitProps) {
             animate="visible"
             transition={{ delay: 0.3 }}
           >
-            <div className="bg-black/40 backdrop-blur-sm border border-purple-500/30 rounded-lg p-6 h-full">
+            <div className="bg-black/40 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-6 h-full">
               <AnimatePresence>
                 {!isHologramActive ? (
                   <motion.div
@@ -137,13 +144,13 @@ export default function Cockpit({ onMintShip }: CockpitProps) {
                     exit={{ opacity: 0 }}
                   >
                     <div className="text-center">
-                      <Globe className="w-24 h-24 text-purple-400 mx-auto mb-6" />
+                      <Globe className="w-24 h-24 text-cyan-400 mx-auto mb-6" />
                       <h2 className="text-3xl font-bold text-white mb-4">No Starship Detected</h2>
-                      <p className="text-xl text-blue-200">Mint your first starship to begin your space commander journey</p>
+                      <p className="text-xl text-cyan-200">Mint your first starship to begin your space commander journey</p>
                     </div>
                     <div className="text-center">
                       <motion.button
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center mx-auto text-lg"
+                        className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 flex items-center mx-auto text-lg"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setIsHologramActive(true)}
@@ -161,16 +168,16 @@ export default function Cockpit({ onMintShip }: CockpitProps) {
                     initial="hidden"
                     animate="visible"
                   >
-                    <h2 className="text-3xl font-bold text-purple-400 mb-6 flex items-center justify-center">
+                    <h2 className="text-3xl font-bold text-cyan-400 mb-6 flex items-center justify-center">
                       <Sparkles className="mr-3" />
                       Luminaris Starship
                     </h2>
                     <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-8">
                       {/* Starship Specs - Left Side */}
-                      <div className="w-full lg:w-80 border rounded-lg p-6">
+                      <div className="w-full lg:w-80 rounded-lg p-6">
                         <h3 className="text-xl font-bold text-yellow-400 mb-4 flex items-center">
                           <Star className="mr-2" />
-                          Starship Specifications
+                          Starship Specs
                         </h3>
                         <div className="space-y-4">
                           <div className="flex justify-between items-center">
@@ -229,10 +236,10 @@ export default function Cockpit({ onMintShip }: CockpitProps) {
               transition={{ delay: 0.5 }}
             >
               <motion.button
-                className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all duration-300 flex items-center mx-auto text-lg"
+                className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-cyan-700 hover:to-blue-700 transition-all duration-300 flex items-center mx-auto text-lg"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleMintShip}
+                                      onClick={handleDeployShip}
               >
                 <Play className="mr-3" />
                 Deploy Starship
@@ -254,23 +261,23 @@ export default function Cockpit({ onMintShip }: CockpitProps) {
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="bg-gradient-to-br from-blue-900 to-purple-900 border border-blue-500/50 rounded-lg p-8 text-center max-w-md mx-4"
+              className="bg-gradient-to-br from-[#0a0a0f] to-[#16213e] border border-cyan-500/50 rounded-lg p-8 text-center max-w-md mx-4"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
             >
               <motion.div
-                className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4"
+                className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
                 <Rocket className="w-8 h-8 text-white" />
               </motion.div>
               <h3 className="text-2xl font-bold text-white mb-2">Deploying Starship</h3>
-              <p className="text-blue-200 mb-4">Initializing your command vessel...</p>
+              <p className="text-cyan-200 mb-4">Initializing your command vessel...</p>
               <div className="w-full bg-gray-700 rounded-full h-2">
                 <motion.div
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full"
+                  className="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: "100%" }}
                   transition={{ duration: 2, ease: "easeInOut" }}

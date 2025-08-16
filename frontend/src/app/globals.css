@@ -1,24 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --cdp-example-page-bg-color: #eaeaea;
+  /* OmniPlanet Space Theme Colors */
+  --omni-deep-space: #0a0a0f;
+  --omni-space-dark: #1a1a2e;
+  --omni-space-blue: #16213e;
+  --omni-cosmic-purple: #533483;
+  --omni-neon-blue: #00d4ff;
+  --omni-electric-blue: #0099cc;
+  --omni-stellar-purple: #8b5cf6;
+  --omni-cosmic-pink: #ec4899;
+  --omni-star-yellow: #fbbf24;
+  --omni-space-gray: #374151;
+  --omni-light-space: #6b7280;
+  --omni-white: #ffffff;
+  --omni-off-white: #f3f4f6;
+  
+  /* Legacy CDP variables for compatibility */
+  --cdp-example-page-bg-color: var(--omni-deep-space);
   --cdp-example-bg-overlay-color: rgba(0, 0, 0, 0.25);
-  --cdp-example-bg-skeleton-color: rgba(0, 0, 0, 0.1);
-  --cdp-example-text-color: #111111;
-  --cdp-example-text-secondary-color: #757575;
-  --cdp-example-accent-color: #008080;
-  --cdp-example-accent-hover-color: #016969;
-  --cdp-example-accent-foreground-color: #ffffff;
-  --cdp-example-bg-low-contrast-color: #eeeeee;
-  --cdp-example-card-bg-color: #ffffff;
-  --cdp-example-card-border-color: #dcdcdc;
+  --cdp-example-bg-skeleton-color: rgba(255, 255, 255, 0.1);
+  --cdp-example-text-color: var(--omni-white);
+  --cdp-example-text-secondary-color: var(--omni-light-space);
+  --cdp-example-accent-color: var(--omni-neon-blue);
+  --cdp-example-accent-hover-color: var(--omni-electric-blue);
+  --cdp-example-accent-foreground-color: var(--omni-deep-space);
+  --cdp-example-bg-low-contrast-color: var(--omni-space-blue);
+  --cdp-example-card-bg-color: var(--omni-space-dark);
+  --cdp-example-card-border-color: var(--omni-cosmic-purple);
   --cdp-example-card-max-width: 30rem;
   --cdp-example-base-font-size: 16px;
   --cdp-example-font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 
-  background-color: var(--cdp-example-page-bg-color);
-  color: var(--cdp-example-card-border-color);
-  color-scheme: light dark;
+  background-color: var(--omni-deep-space);
+  color: var(--omni-white);
+  color-scheme: dark;
   font-family: var(--cdp-example-font-family);
   font-size: var(--cdp-example-base-font-size);
   font-synthesis: none;
@@ -29,24 +45,24 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
-    --cdp-example-page-bg-color: #0a0b0d;
+    --cdp-example-page-bg-color: var(--omni-deep-space);
     --cdp-example-bg-overlay-color: rgba(0, 0, 0, 0.25);
     --cdp-example-bg-skeleton-color: rgba(255, 255, 255, 0.1);
-    --cdp-example-text-color: #fafafa;
-    --cdp-example-text-secondary-color: #8a919e;
-    --cdp-example-accent-color: #00adad;
-    --cdp-example-accent-hover-color: #04c0c0;
-    --cdp-example-accent-foreground-color: #0a0b0d;
-    --cdp-example-bg-low-contrast-color: #32353d;
-    --cdp-example-card-bg-color: #141519;
-    --cdp-example-card-border-color: #24262a;
+    --cdp-example-text-color: var(--omni-white);
+    --cdp-example-text-secondary-color: var(--omni-light-space);
+    --cdp-example-accent-color: var(--omni-neon-blue);
+    --cdp-example-accent-hover-color: var(--omni-electric-blue);
+    --cdp-example-accent-foreground-color: var(--omni-deep-space);
+    --cdp-example-bg-low-contrast-color: var(--omni-space-blue);
+    --cdp-example-card-bg-color: var(--omni-space-dark);
+    --cdp-example-card-border-color: var(--omni-cosmic-purple);
   }
 }
 
 ::selection {
-  background-color: color(from var(--cdp-example-accent-color) srgb r g b / 0.3);
+  background-color: color(from var(--omni-neon-blue) srgb r g b / 0.3);
 }
 
 html,
@@ -58,6 +74,7 @@ body {
   margin: 0;
   min-height: 100vh;
   min-width: 320px;
+  background: linear-gradient(135deg, var(--omni-deep-space) 0%, var(--omni-space-blue) 50%, var(--omni-cosmic-purple) 100%);
 }
 
 body,
@@ -108,29 +125,29 @@ p {
 }
 
 a {
-  color: var(--cdp-example-accent-color);
+  color: var(--omni-neon-blue);
 }
 
 a:hover {
-  color: var(--cdp-example-accent-hover-color);
+  color: var(--omni-electric-blue);
 }
 
 hr {
-  border: 0 solid var(--cdp-example-card-border-color);
+  border: 0 solid var(--omni-cosmic-purple);
   border-bottom-width: 1px;
   margin: 1rem 0;
 }
 
 .app {
   height: 100%;
-  color: var(--cdp-example-text-color);
+  color: var(--omni-white);
   margin: 0 auto;
   width: 100%;
 }
 
 header {
-  background-color: var(--cdp-example-card-bg-color);
-  border-bottom: 1px solid var(--cdp-example-card-border-color);
+  background-color: var(--omni-space-dark);
+  border-bottom: 1px solid var(--omni-cosmic-purple);
   padding: 0.5rem 1rem;
   width: 100%;
 }
@@ -196,8 +213,8 @@ header .wallet-address {
 
 .card {
   align-items: center;
-  background-color: var(--cdp-example-card-bg-color);
-  border: 1px solid var(--cdp-example-card-border-color);
+  background-color: var(--omni-space-dark);
+  border: 1px solid var(--omni-cosmic-purple);
   border-radius: 1rem;
   display: flex;
   flex-direction: column;
@@ -207,6 +224,8 @@ header .wallet-address {
   padding: 2rem 1rem;
   text-align: center;
   width: 100%;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.1);
 }
 
 .card-title {
@@ -256,7 +275,7 @@ header .wallet-address {
 .copy-address-button {
   background-color: transparent;
   border: 0;
-  color: var(--cdp-example-text-color);
+  color: var(--omni-white);
   cursor: pointer;
   padding: 0;
 }
