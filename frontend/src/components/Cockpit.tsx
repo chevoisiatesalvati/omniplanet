@@ -121,7 +121,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
                 {!isHologramActive ? (
                   <motion.div
                     key='inactive'
-                    className='h-full flex flex-col justify-between py-20'
+                    className='h-full flex flex-col justify-between py-20 gap-4'
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -131,7 +131,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
                       <h2 className='text-3xl font-bold text-white mb-4'>
                         No Starship Detected
                       </h2>
-                      <p className='text-xl text-cyan-200'>
+                      <p className='text-xl text-cyan-200 mb-8'>
                         Mint your first starship to begin your space commander
                         journey
                       </p>

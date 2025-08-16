@@ -1,5 +1,12 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Orbitron } from 'next/font/google';
+
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-orbitron',
+});
 
 export const metadata: Metadata = {
   title: 'OmniPlanet - Space Commander Terminal',
@@ -20,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en'>
+    <html lang='en' className={orbitron.variable}>
       <body>
         <div className='root'>{children}</div>
       </body>

@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -33,7 +33,9 @@
   --cdp-example-card-border-color: var(--omni-cosmic-purple);
   --cdp-example-card-max-width: 30rem;
   --cdp-example-base-font-size: 16px;
-  --cdp-example-font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --cdp-example-font-family:
+    var(--font-orbitron), 'Orbitron', system-ui, Avenir, Helvetica, Arial,
+    sans-serif;
 
   background-color: var(--omni-deep-space);
   color: var(--omni-white);
