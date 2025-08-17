@@ -44,7 +44,7 @@ contract StarHub is OApp, OAppOptionsType3 {
     constructor(address _endpoint, address _owner) OApp(_endpoint, _owner) Ownable(_owner) {}
 
     /// @notice Start a new game
-    function startGame() external onlyOwner {
+    function startGame() external {
         require(!gameActive, "Game already active");
         
         // Initialize player health
@@ -159,31 +159,31 @@ contract StarHub is OApp, OAppOptionsType3 {
     ) internal override {
         // Decode the incoming message from the composer
         // Format: abi.encode(playerId, zones, currentRound)
-        (uint8 playerId, uint8 zones, uint8 round) = abi.decode(_message, (uint8, uint8, uint8));
+        (uint8 playerId, uint8 zones) = abi.decode(_message, (uint8, uint8));
         
         // Validate player ID
         require(playerId == 1 || playerId == 2, "Invalid player ID");
 
         // Update player zones based on source chain
-        if (_origin.srcEid == 1) { // Chain A - Attack zones
+        if (_origin.srcEid == 40245) { // Chain A - Attack zones // todo: fix it
             playerAttackZones[playerId] = zones;
-        } else if (_origin.srcEid == 2) { // Chain B - Defense zones
+        } else if (_origin.srcEid == 40231) { // Chain B - Defense zones
             playerDefenseZones[playerId] = zones;
         }
         
         // Mark the player's action as complete for this round
         // playerId 1 maps to index 0, playerId 2 maps to index 1
-        roundCompletions[round][playerId - 1] = true;
+        roundCompletions[currentRound][playerId - 1] = true;
         
-        emit PlayerActionReceived(playerId, round, zones);
+        emit PlayerActionReceived(playerId, currentRound, zones);
         
         // Check if both players have completed their actions for this round
-        bool[2] memory completions = roundCompletions[round];
+        bool[2] memory completions = roundCompletions[currentRound];
         if (completions[0] && completions[1]) {
-            emit RoundCompleted(round, completions[0], completions[1]);
+            emit RoundCompleted(currentRound, completions[0], completions[1]);
             
             // Both players have completed their actions for this round
-            _processRound(round);
+            _processRound(currentRound);
         }
         
         // Store the last message for debugging
@@ -191,7 +191,7 @@ contract StarHub is OApp, OAppOptionsType3 {
             "Player ", 
             _uint8ToString(playerId), 
             " completed round ", 
-            _uint8ToString(round), 
+            _uint8ToString(currentRound), 
             " with ", 
             _uint8ToString(zones), 
             " zones"

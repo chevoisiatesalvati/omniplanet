@@ -44,12 +44,15 @@ task('send-nft-compose', 'Sends an NFT from chain A to chain B using MyONFTAdapt
         // Options.newOptions().addExecutorLzReceiveOption(50000, 0).addExecutorLzComposeOption(0, 30000, 0);
         const options = Options.newOptions()
             .addExecutorLzReceiveOption(300000, 0)
-            .addExecutorComposeOption(0, 200_000, 1)
+            .addExecutorComposeOption(0, 700_000, 0.00045 * 10 ** 18)
             .toBytes()
 
         // Build the compose message: abi.encode(playerId)
         // This matches what MyONFT721ComposerMock.lzCompose expects
-        const composeMsg = ethers.utils.defaultAbiCoder.encode(['uint8'], [parseInt(playerId)])
+        const composeMsg = ethers.utils.defaultAbiCoder.encode(
+            ['uint8', 'uint256'],
+            [parseInt(playerId), parseInt(tokenId)]
+        )
 
         // Build the parameters
         const sendParam: SendParam = {

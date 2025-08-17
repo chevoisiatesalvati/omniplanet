@@ -7,13 +7,12 @@ import { OAppOptionsType3 } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OA
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 import { ONFTComposeMsgCodec } from "@layerzerolabs/onft-evm/contracts/libs/ONFTComposeMsgCodec.sol";
-import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 /*
 *
 The Composer on ChainA (Base testnet) and ChainB (Arbitrum One testnet) handles the zone logic, 
 where a it maintains claims (zones[playerId] += rand(-1,2), min 0, max 5).
-It validates the random value, updates local zones, sends a message to ChainH's OApp via send within a Composer indicating logic is done.
+It validates the random value, updates local zones, sends a message to ChainH’s OApp via send within a Composer indicating logic is done.
 *
 */
 
@@ -23,6 +22,7 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
     bytes32 public guid;
     bytes public message;
     address public executor;
+    bytes public extraData;
 
     using ONFTComposeMsgCodec for bytes;
     using ONFTComposeMsgCodec for bytes32;
@@ -39,9 +39,16 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
     mapping(uint8 => uint8) public zones;
     uint8 public constant MAX_ZONES = 7;
     uint8 public constant MIN_ZONES = 0;
-    
+    uint8 public currentRound = 1;
+
     // Events
     event ZoneClaimed(uint8 indexed playerId, uint8 oldZones, uint8 newZones, int8 bonus);
+    event RoundIncremented(uint8 newRound);
+
+    function _incrementRound() internal {
+        currentRound += 1;
+        emit RoundIncremented(currentRound);
+    }
 
     function _claimZones(uint8 _playerId) internal {
         require(_playerId > 0 && _playerId <= 2, "Invalid player ID (must be 1 or 2)");
@@ -80,6 +87,7 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
         if (random == 2) return 1;
         return 2;
     }
+
 
     /// @notice Initialize with Endpoint V2 and owner address
     /// @param _endpoint The local chain's LayerZero Endpoint V2 address
@@ -159,7 +167,7 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
             _data,
             combineOptions(_dstEid, SEND, _options),
             MessagingFee(msg.value, 0),
-            tx.origin
+            payable(msg.sender)
         );
     }
 
@@ -201,56 +209,30 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
     function lzCompose(
         address _from,
         bytes32 _guid,
-        bytes calldata _message, // [composeHeader][composeMsg]
+        bytes calldata _message,
         address _executor,
         bytes calldata /*_extraData*/
     ) external payable {
         from = _from;
         guid = _guid;
-        message = _message.composeMsg();
+        message = _message;
         executor = _executor;
-
-        address senderOnSrc = _message.composeFrom().bytes32ToAddress();
+        extraData = _message;
 
         // Decode the message to get playerId
-        (uint8 playerId, uint256 tokenId) = abi.decode(message, (uint8, uint256));
+        uint8 playerId = abi.decode(_message, (uint8));
 
         // Claim zones for the player
         _claimZones(playerId);
+
+        // Increment round
+        _incrementRound();
+
+        bytes memory update = abi.encode(playerId, zones[playerId], currentRound);
         
-        // ✅ Send zones WITHOUT round - StarHub will assign the round
-        bytes memory update = abi.encode(playerId, zones[playerId]);
-        
-        // Send to StarHub
+        // CORRECT: Use dedicated sendBytes function
         this.sendBytes{value: msg.value}(40161, update, "");
-        
-        // Transfer the ONFT back to the sender
-        _transferONFTBackToSender(senderOnSrc, tokenId);
     }
-    
-    /// @notice Transfer ONFT back to the sender on source chain
-    function _transferONFTBackToSender(address _senderOnSrc, uint256 tokenId) internal {
-        // The executor should be the ONFT contract
-        address onftContract = from;
-                
-        if (tokenId > 0 && onftContract != address(0)) {
-            // Use IERC721 interface for the transfer
-            try IERC721(onftContract).safeTransferFrom(address(this), _senderOnSrc, tokenId) {
-                emit ONFTTransferredBack(_senderOnSrc, tokenId, onftContract);
-            } catch {
-                // Fallback to regular transferFrom if safeTransferFrom fails
-                try IERC721(onftContract).transferFrom(address(this), _senderOnSrc, tokenId) {
-                    emit ONFTTransferredBack(_senderOnSrc, tokenId, onftContract);
-                } catch {
-                    emit ONFTTransferFailed(_senderOnSrc, tokenId, onftContract);
-                }
-            }
-        }
-    }
-    
-    // Events
-    event ONFTTransferredBack(address indexed sender, uint256 indexed tokenId, address indexed onftContract);
-    event ONFTTransferFailed(address indexed sender, uint256 indexed tokenId, address indexed onftContract);
 
     function hardSetZones(uint8 _playerId, uint8 _zones) external onlyOwner {
         require(_playerId > 0 && _playerId <= 2, "Invalid player ID (must be 1 or 2)");
@@ -262,6 +244,14 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
         emit ZoneClaimed(_playerId, oldZones, _zones, 0);
     }
 
+    /// @notice Hard-set round number (for testing purposes)
+    /// @param _round The round number to set
+    function hardSetRound(uint8 _round) external onlyOwner {
+        uint8 oldRound = currentRound;
+        currentRound = _round;
+        
+        emit RoundIncremented(_round);
+    }
 
     /// @notice Reset all zones to 0 (for testing purposes)
     function resetAllZones() external onlyOwner {
@@ -278,8 +268,9 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
     /// @notice Get current game state for testing
     function getGameState() external view returns (
         uint8 player1Zones,
-        uint8 player2Zones
+        uint8 player2Zones,
+        uint8 round
     ) {
-        return (zones[1], zones[2]);
+        return (zones[1], zones[2], currentRound);
     }
 }

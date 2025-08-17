@@ -3,14 +3,19 @@ import { ExecutorOptionType } from '@layerzerolabs/lz-v2-utilities'
 import { TwoWayConfig, generateConnectionsConfig } from '@layerzerolabs/metadata-tools'
 import { OAppEnforcedOption, OmniPointHardhat } from '@layerzerolabs/toolbox-hardhat'
 
-const optimismContract: OmniPointHardhat = {
-    eid: EndpointId.OPTSEP_V2_TESTNET,
-    contractName: 'MyOApp',
+const ethHubContract: OmniPointHardhat = {
+    eid: EndpointId.SEPOLIA_V2_TESTNET,
+    contractName: 'StarHub',
 }
 
 const arbitrumContract: OmniPointHardhat = {
     eid: EndpointId.ARBSEP_V2_TESTNET,
-    contractName: 'MyOApp',
+    contractName: 'MyONFT721ComposerMock',
+}
+
+const baseContract: OmniPointHardhat = {
+    eid: EndpointId.BASESEP_V2_TESTNET,
+    contractName: 'MyONFT721ComposerMock',
 }
 
 // For this example's simplicity, we will use the same enforced options values for sending to all chains
@@ -20,7 +25,7 @@ const EVM_ENFORCED_OPTIONS: OAppEnforcedOption[] = [
     {
         msgType: 1,
         optionType: ExecutorOptionType.LZ_RECEIVE,
-        gas: 80000,
+        gas: 200000,
         value: 0,
     },
 ]
@@ -32,8 +37,15 @@ const EVM_ENFORCED_OPTIONS: OAppEnforcedOption[] = [
 // i.e. if you declare A,B there's no need to declare B,A
 const pathways: TwoWayConfig[] = [
     [
-        optimismContract, // Chain A contract
+        ethHubContract, // Chain A contract
         arbitrumContract, // Chain B contract
+        [['LayerZero Labs'], []], // [ requiredDVN[], [ optionalDVN[], threshold ] ]
+        [1, 1], // [A to B confirmations, B to A confirmations]
+        [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
+    ],
+    [
+        ethHubContract, // Chain A contract
+        baseContract, // Chain B contract
         [['LayerZero Labs'], []], // [ requiredDVN[], [ optionalDVN[], threshold ] ]
         [1, 1], // [A to B confirmations, B to A confirmations]
         [EVM_ENFORCED_OPTIONS, EVM_ENFORCED_OPTIONS], // Chain B enforcedOptions, Chain A enforcedOptions
@@ -44,7 +56,7 @@ export default async function () {
     // Generate the connections config based on the pathways
     const connections = await generateConnectionsConfig(pathways)
     return {
-        contracts: [{ contract: optimismContract }, { contract: arbitrumContract }],
+        contracts: [{ contract: ethHubContract }, { contract: arbitrumContract }, { contract: baseContract }],
         connections,
     }
 }
