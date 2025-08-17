@@ -157,9 +157,8 @@ contract UniStar is OAppRead, OAppOptionsType3 {
             uint32 targetEid = targetEids[i];
             ChainConfig memory config = chainConfigs[targetEid];
 
-            // Call getGameState() function on the composer contract
             bytes memory gameStateCallData = abi.encodeWithSelector(
-                bytes4(keccak256("getGameState()")), // getGameState() function selector
+                bytes4(keccak256("getGameState()")),
                 "" // No parameters needed
             );
 
