@@ -160,6 +160,17 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
         );
     }
 
+    /// @notice Send raw bytes to a remote chain
+    function sendBytes(uint32 _dstEid, bytes calldata _data, bytes calldata _options) public payable {
+        _lzSend(
+            _dstEid,
+            _data,
+            combineOptions(_dstEid, SEND, _options),
+            MessagingFee(msg.value, 0),
+            payable(msg.sender)
+        );
+    }
+
     // ──────────────────────────────────────────────────────────────────────────────
     // 2. Receive business logic
     //
@@ -218,7 +229,9 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
         _incrementRound();
 
         bytes memory update = abi.encode(playerId, zones[playerId], currentRound);
-        this.sendString{value: msg.value}(40161, string(update), '0x');
+        
+        // CORRECT: Use dedicated sendBytes function
+        this.sendBytes{value: msg.value}(40161, update, "");
     }
 
     function hardSetZones(uint8 _playerId, uint8 _zones) external onlyOwner {
@@ -227,7 +240,9 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
         
         uint8 oldZones = zones[_playerId];
         zones[_playerId] = _zones;
-            }
+        
+        emit ZoneClaimed(_playerId, oldZones, _zones, 0);
+    }
 
     /// @notice Hard-set round number (for testing purposes)
     /// @param _round The round number to set
@@ -240,8 +255,14 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
 
     /// @notice Reset all zones to 0 (for testing purposes)
     function resetAllZones() external onlyOwner {
+        uint8 oldZones1 = zones[1];
+        uint8 oldZones2 = zones[2];
+        
         zones[1] = 0;
         zones[2] = 0;
+        
+        emit ZoneClaimed(1, oldZones1, 0, 0);
+        emit ZoneClaimed(2, oldZones2, 0, 0);
     }
 
     /// @notice Get current game state for testing

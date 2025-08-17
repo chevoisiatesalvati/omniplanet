@@ -16,10 +16,16 @@ task('send-nft-compose', 'Sends an NFT from chain A to chain B using MyONFTAdapt
     .addParam('dstEndpointId', 'Destination chain endpoint ID')
     .addParam('composerAddress', 'Composer address on dst chain')
     .addParam('tokenId', 'Token ID to send')
+    .addParam('playerId', 'Player ID (1 or 2) for zone claiming')
     .setAction(async (taskArgs, { ethers, deployments }) => {
-        const { dstEndpointId, composerAddress, tokenId } = taskArgs
+        const { dstEndpointId, composerAddress, tokenId, playerId } = taskArgs
         const [signer] = await ethers.getSigners()
         const onft = await deployments.get('MyONFT721Mock')
+
+        // Validate player ID
+        if (playerId !== '1' && playerId !== '2') {
+            throw new Error('Player ID must be 1 or 2')
+        }
 
         // Get adapter contract instance
         const adapterContract = new ethers.Contract(onft.address, onft.abi, signer)
@@ -41,13 +47,17 @@ task('send-nft-compose', 'Sends an NFT from chain A to chain B using MyONFTAdapt
             .addExecutorComposeOption(0, 200_000, 1)
             .toBytes()
 
+        // Build the compose message: abi.encode(playerId)
+        // This matches what MyONFT721ComposerMock.lzCompose expects
+        const composeMsg = ethers.utils.defaultAbiCoder.encode(['uint8'], [parseInt(playerId)])
+
         // Build the parameters
         const sendParam: SendParam = {
             dstEid: dstEndpointId,
             to: addressToBytes32(composerAddress), // convert to bytes32
             tokenId: tokenId,
             extraOptions: options, // If you want to pass custom options
-            composeMsg: '0x1234', // If you want additional logic on the remote chain
+            composeMsg: composeMsg, // If you want additional logic on the remote chain
             onftCmd: '0x',
         }
 
@@ -59,4 +69,6 @@ task('send-nft-compose', 'Sends an NFT from chain A to chain B using MyONFTAdapt
 
         const receipt = await tx.wait()
         console.log('🎉 NFT sent! Transaction hash:', receipt.transactionHash)
+        console.log(`�� Player ${playerId} will claim zones on destination chain`)
+        console.log(`🎯 Compose message: ${composeMsg}`)
     })
