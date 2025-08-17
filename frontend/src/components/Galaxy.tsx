@@ -11,10 +11,18 @@ import {
   useGLTF,
 } from '@react-three/drei';
 import { Vector3 } from 'three';
-import { ArrowLeft, Heart, Navigation, Shield, Zap } from 'lucide-react';
+import {
+  ArrowLeft,
+  Heart,
+  Navigation,
+  Shield,
+  Zap,
+  MapPin,
+} from 'lucide-react';
 import { PLANET_TO_NETWORK, type NetworkKey } from '@/config/networks';
 import { useStarship } from '@/hooks/useStarship';
 import { useCurrentNetworkKey } from '@/hooks/useCurrentNetwork';
+import { useShipSpecs } from '@/hooks/useShipSpecs';
 
 interface GalaxyProps {
   onBackToCockpit: () => void;
@@ -34,6 +42,12 @@ interface PlanetDescriptor {
 }
 
 type SelectedPositionRef = React.MutableRefObject<Vector3 | null>;
+
+// Planet data for location tracking
+const PLANETS = {
+  'arbitrum-sepolia': { name: 'Vulcania', type: 'Mining' },
+  'base-sepolia': { name: 'Amethea', type: 'Research' },
+} as const;
 
 function CameraRig({
   selected,
@@ -97,11 +111,19 @@ function Planet({
   // hover scaling is disabled for this use case
   const { scene } = useGLTF(data.modelPath);
   const angleRef = useRef<number>(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const currentScaleRef = useRef(1);
 
   useFrame((_, delta) => {
     if (!orbitRef.current) return;
     if (spinRef.current) {
       spinRef.current.rotation.y += 0.2 * delta;
+
+      // Animate scale on hover
+      const targetScale = isHovered ? 1.1 : 1;
+      const scaleDiff = targetScale - currentScaleRef.current;
+      currentScaleRef.current += scaleDiff * delta * 8; // Smooth transition
+      spinRef.current.scale.setScalar(currentScaleRef.current);
     }
     // Optional orbit around a central point
     const orbit: any = (data as any).orbit;
@@ -130,6 +152,14 @@ function Planet({
         e.stopPropagation();
         onSelect(data);
       }}
+      onPointerOver={() => {
+        document.body.style.cursor = 'pointer';
+        setIsHovered(true);
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = 'default';
+        setIsHovered(false);
+      }}
     >
       <group ref={spinRef}>
         <primitive object={scene} />
@@ -157,6 +187,10 @@ function Planet({
 export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
   const currentNetwork = useCurrentNetworkKey('base-sepolia');
   const { state, travel } = useStarship(currentNetwork);
+  const { state: shipSpecsState } = useShipSpecs(
+    currentNetwork,
+    state.tokenId || 1n
+  );
   const planets: PlanetDescriptor[] = [
     {
       id: 1,
@@ -191,6 +225,31 @@ export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
   const [selected, setSelected] = useState<PlanetDescriptor | null>(null);
   const selectedPositionRef = useRef<Vector3 | null>(null);
 
+  // Determine current ship location
+  const currentLocation = useMemo(() => {
+    if (!state.hasShip || !state.tokenId) return null;
+
+    // Find which network has the ship
+    for (const [network, balanceInfo] of Object.entries(state.balances)) {
+      if (balanceInfo.tokenIds.includes(state.tokenId!)) {
+        return PLANETS[network as NetworkKey];
+      }
+    }
+    return null;
+  }, [state.hasShip, state.tokenId, state.balances]);
+
+  // Check if ship is at the selected planet
+  const isShipAtSelectedPlanet = useMemo(() => {
+    if (!selected || !currentLocation) return false;
+    return selected.name === currentLocation.name;
+  }, [selected, currentLocation]);
+
+  // Check if travel is possible (ship must be at selected planet to initiate travel)
+  const canTravelFromSelectedPlanet = useMemo(() => {
+    if (!selected || !currentLocation) return false;
+    return selected.name === currentLocation.name;
+  }, [selected, currentLocation]);
+
   return (
     <div className='relative min-h-screen w-full overflow-hidden'>
       {/* Galaxy background (temporary fixed-resolution image) */}
@@ -210,6 +269,10 @@ export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
             antialias: true,
             alpha: true,
             powerPreference: 'high-performance',
+          }}
+          onPointerMissed={() => {
+            // When clicking on empty space, deselect the current planet
+            setSelected(null);
           }}
         >
           <ambientLight intensity={0.7} />
@@ -290,15 +353,36 @@ export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
         >
           <div className='flex items-center gap-1'>
             <Zap className='w-4 h-4 text-yellow-400' />
-            <span className='text-white'>ATK: 10</span>
+            <span className='text-white'>
+              ATK:{' '}
+              {shipSpecsState.isLoading
+                ? '...'
+                : shipSpecsState.specs
+                  ? Number(shipSpecsState.specs.attack)
+                  : '10'}
+            </span>
           </div>
           <div className='flex items-center gap-1'>
             <Shield className='w-4 h-4 text-blue-400' />
-            <span className='text-white'>DEF: 10</span>
+            <span className='text-white'>
+              DEF:{' '}
+              {shipSpecsState.isLoading
+                ? '...'
+                : shipSpecsState.specs
+                  ? Number(shipSpecsState.specs.defense)
+                  : '10'}
+            </span>
           </div>
           <div className='flex items-center gap-1'>
             <Heart className='w-4 h-4 text-red-400' />
-            <span className='text-white'>100%</span>
+            <span className='text-white'>
+              {shipSpecsState.isLoading
+                ? '...'
+                : shipSpecsState.specs
+                  ? Number(shipSpecsState.specs.health)
+                  : '100'}
+              %
+            </span>
           </div>
         </motion.div>
       </div>
@@ -334,6 +418,29 @@ export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
                   ))}
                 </div>
               </div>
+              {/* Ship location indicator */}
+              {currentLocation && (
+                <div className='mb-3'>
+                  <h4 className='text-sm font-semibold text-cyan-300 mb-1 flex items-center'>
+                    <MapPin className='w-4 h-4 mr-1' />
+                    Ship Location
+                  </h4>
+                  <div className='flex items-center gap-2'>
+                    <span className='text-xs px-2 py-1 rounded-md bg-white/10 text-gray-100 border border-white/10'>
+                      {currentLocation.name}
+                    </span>
+                    {isShipAtSelectedPlanet ? (
+                      <span className='text-xs px-2 py-1 rounded-md bg-green-500/20 text-green-300 border border-green-500/30'>
+                        Ship is here
+                      </span>
+                    ) : (
+                      <span className='text-xs px-2 py-1 rounded-md bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'>
+                        Ship is elsewhere
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             <button
               onClick={() => setSelected(null)}
@@ -344,11 +451,15 @@ export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
           </div>
 
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`mt-4 w-full bg-gradient-to-r ${selected.accent} text-white py-2.5 px-4 rounded-lg font-semibold`}
+            whileHover={canTravelFromSelectedPlanet ? { scale: 1.02 } : {}}
+            whileTap={canTravelFromSelectedPlanet ? { scale: 0.98 } : {}}
+            className={`mt-4 w-full py-2.5 px-4 rounded-lg font-semibold ${
+              canTravelFromSelectedPlanet
+                ? `bg-gradient-to-r ${selected.accent} text-white hover:opacity-90`
+                : 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
+            }`}
             onClick={async () => {
-              if (!state.tokenId) return;
+              if (!state.tokenId || !canTravelFromSelectedPlanet) return;
               const destination =
                 PLANET_TO_NETWORK[selected.name] ?? 'base-sepolia';
               try {
@@ -357,8 +468,11 @@ export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
                 // ignore for now
               }
             }}
+            disabled={!canTravelFromSelectedPlanet}
           >
-            Travel and Mine
+            {canTravelFromSelectedPlanet
+              ? 'Travel and Mine'
+              : 'Ship not at this planet'}
           </motion.button>
         </motion.div>
       )}

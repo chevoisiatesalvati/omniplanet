@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useStarship } from '@/hooks/useStarship';
 import { useShipSpecs } from '@/hooks/useShipSpecs';
 import { useCurrentNetworkKey } from '@/hooks/useCurrentNetwork';
@@ -13,14 +13,23 @@ import {
   Globe,
   Star,
   Sparkles,
+  MapPin,
 } from 'lucide-react';
 import Starship3D from './Starship3D';
 import StarBackground from './StarBackground';
+import { type NetworkKey } from '@/config/networks';
+import { useGLTF } from '@react-three/drei';
 
 interface CockpitProps {
   onMintShip: () => void;
   onDeployShip?: () => void;
 }
+
+// Planet data for location tracking
+const PLANETS = {
+  'arbitrum-sepolia': { name: 'Vulcania', type: 'Mining' },
+  'base-sepolia': { name: 'Amethea', type: 'Research' },
+} as const;
 
 export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
   const [isHologramActive, setIsHologramActive] = useState(false);
@@ -31,6 +40,19 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
     currentNetwork,
     state.tokenId || 1n
   );
+
+  // Determine current ship location
+  const currentLocation = useMemo(() => {
+    if (!state.hasShip || !state.tokenId) return null;
+
+    // Find which network has the ship
+    for (const [network, balanceInfo] of Object.entries(state.balances)) {
+      if (balanceInfo.tokenIds.includes(state.tokenId!)) {
+        return PLANETS[network as NetworkKey];
+      }
+    }
+    return null;
+  }, [state.hasShip, state.tokenId, state.balances]);
 
   const cockpitVariants = {
     hidden: { opacity: 0 },
@@ -130,7 +152,23 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
           >
             <div className='bg-black/40 backdrop-blur-sm border border-cyan-500/30 rounded-lg p-6 h-full'>
               <AnimatePresence>
-                {!isHologramActive && !state.hasShip ? (
+                {state.isLoading ? (
+                  <motion.div
+                    key='loading'
+                    className='h-full flex flex-col justify-center items-center py-20 gap-4'
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <div className='animate-spin rounded-full h-16 w-16 border-b-2 border-cyan-400 mb-6'></div>
+                    <h2 className='text-2xl font-bold text-white mb-2'>
+                      Scanning for Starships
+                    </h2>
+                    <p className='text-lg text-cyan-200 text-center'>
+                      Checking all known galaxies for your command vessel...
+                    </p>
+                  </motion.div>
+                ) : !isHologramActive && !state.hasShip ? (
                   <motion.div
                     key='inactive'
                     className='h-full flex flex-col justify-between py-20 gap-4'
@@ -168,10 +206,20 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
                     initial='hidden'
                     animate='visible'
                   >
-                    <h2 className='text-3xl font-bold text-cyan-400 mb-6 flex items-center justify-center'>
-                      <Sparkles className='mr-3' />
-                      Luminaris Starship
-                    </h2>
+                    <div className='flex items-center justify-center mb-6'>
+                      <h2 className='text-3xl font-bold text-cyan-400 flex items-center'>
+                        <Sparkles className='mr-3' />
+                        Luminaris Starship
+                      </h2>
+                      {currentLocation && (
+                        <div className='ml-6 flex items-center bg-black/30 border border-cyan-500/30 rounded-lg px-3 py-1'>
+                          <MapPin className='w-4 h-4 text-cyan-400 mr-2' />
+                          <span className='text-cyan-200 text-sm'>
+                            Currently at {currentLocation.name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                     <div className='flex-1 min-h-0 flex flex-col lg:flex-row gap-8'>
                       {/* Starship Specs - Left Side */}
                       <div className='w-full lg:w-80 rounded-lg p-6'>
@@ -310,3 +358,6 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
     </div>
   );
 }
+
+// Preload ship model for faster interaction
+useGLTF.preload('/luminaris_starship.glb');
