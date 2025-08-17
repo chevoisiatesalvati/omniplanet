@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Orbitron } from 'next/font/google';
+import { Exo_2 } from 'next/font/google';
 import '@rainbow-me/rainbowkit/styles.css';
 import Providers from '@/components/Providers';
 
-const orbitron = Orbitron({
+const exo2 = Exo_2({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-orbitron',
+  variable: '--font-exo2',
 });
 
 export const metadata: Metadata = {
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en' className={orbitron.variable}>
+    <html lang='en' className={exo2.variable}>
       <body>
         <div className='root'>
           <Providers>{children}</Providers>

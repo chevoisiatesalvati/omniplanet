@@ -34,7 +34,7 @@
   --cdp-example-card-max-width: 30rem;
   --cdp-example-base-font-size: 16px;
   --cdp-example-font-family:
-    var(--font-orbitron), 'Orbitron', system-ui, Avenir, Helvetica, Arial,
+    var(--font-exo2), 'Exo 2', system-ui, Avenir, Helvetica, Arial,
     sans-serif;
 
   background-color: var(--omni-deep-space);
