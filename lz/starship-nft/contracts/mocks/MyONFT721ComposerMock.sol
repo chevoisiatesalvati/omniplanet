@@ -6,7 +6,15 @@ import { OApp, Origin, MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oa
 import { OAppOptionsType3 } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
+import { ONFTComposeMsgCodec } from "@layerzerolabs/onft-evm/contracts/libs/ONFTComposeMsgCodec.sol";
 
+/*
+*
+The Composer on ChainA (Base testnet) and ChainB (Arbitrum One testnet) handles the zone logic, 
+where a it maintains claims (zones[playerId] += rand(-1,2), min 0, max 5).
+It validates the random value, updates local zones, sends a message to ChainH’s OApp via send within a Composer indicating logic is done.
+*
+*/
 
 contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
     // default empty values for testing a lzCompose received message
@@ -16,6 +24,9 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
     address public executor;
     bytes public extraData;
 
+    using ONFTComposeMsgCodec for bytes;
+    using ONFTComposeMsgCodec for bytes32;
+
     /// @notice Last string received from any remote chain
     string public lastMessage;
 
@@ -23,6 +34,59 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
     uint16 public constant SEND = 1;
 
     using OptionsBuilder for bytes;
+
+    // Zone management
+    mapping(uint8 => uint8) public zones;
+    uint8 public constant MAX_ZONES = 7;
+    uint8 public constant MIN_ZONES = 0;
+    uint8 public currentRound = 1;
+
+    // Events
+    event ZoneClaimed(uint8 indexed playerId, uint8 oldZones, uint8 newZones, int8 bonus);
+    event RoundIncremented(uint8 newRound);
+
+    function _incrementRound() internal {
+        currentRound += 1;
+        emit RoundIncremented(currentRound);
+    }
+
+    function _claimZones(uint8 _playerId) internal {
+        require(_playerId > 0 && _playerId <= 2, "Invalid player ID (must be 1 or 2)");
+        
+        uint8 currentZones = zones[_playerId];
+        int8 bonus = _getRandomBonus();
+        uint8 newZones = _calculateNewZones(currentZones, bonus);
+        
+        // Update zones
+        zones[_playerId] = newZones;
+        emit ZoneClaimed(_playerId, currentZones, newZones, bonus);
+    }
+
+    /// @notice Calculate new zones with bonus, clamped to min/max
+    function _calculateNewZones(uint8 _currentZones, int8 _bonus) internal pure returns (uint8) {
+        int16 newZones = int16(uint16(_currentZones)) + int16(_bonus);
+        
+        if (newZones < int16(uint16(MIN_ZONES))) return MIN_ZONES;
+        if (newZones > int16(uint16(MAX_ZONES))) return MAX_ZONES;
+        
+        return uint8(uint16(newZones));
+    }
+
+    /// @notice Get a random bonus between -1 and +2
+    function _getRandomBonus() internal view returns (int8) {
+        // Simple pseudo-random number generation
+        // In production, consider using Chainlink VRF or similar
+        uint256 random = uint256(keccak256(abi.encodePacked(
+            block.timestamp,
+            block.prevrandao,
+            msg.sender
+        ))) % 4;
+        
+        if (random == 0) return -1;
+        if (random == 1) return 0;
+        if (random == 2) return 1;
+        return 2;
+    }
 
 
     /// @notice Initialize with Endpoint V2 and owner address
@@ -144,24 +208,48 @@ contract MyONFT721ComposerMock is IOAppComposer, OApp, OAppOptionsType3 {
         executor = _executor;
         extraData = _message;
 
+        // Decode the message to get playerId
+        uint8 playerId = abi.decode(_message, (uint8));
 
-        bytes memory options = OptionsBuilder.newOptions()
-            .addExecutorLzReceiveOption(300000, 0)
-            .toBytes();
+        // Claim zones for the player
+        _claimZones(playerId);
 
-        // Get fee estimate first
-        MessagingFee memory fee = quoteSendString(
-            40,
-            "Hello World",
-            options,
-            false  // pay in native gas
-        );
+        // Increment round
+        _incrementRound();
 
-        // Then send with the estimated fee
-        sendString{value: fee.nativeFee}(
-            dstEid, // TODO: hardcode for now
-            "Hello World",
-            options
-        );
+        bytes memory update = abi.encode(playerId, zones[playerId], currentRound);
+        this.sendString{value: msg.value}(40161, string(update), '0x');
+    }
+
+    function hardSetZones(uint8 _playerId, uint8 _zones) external onlyOwner {
+        require(_playerId > 0 && _playerId <= 2, "Invalid player ID (must be 1 or 2)");
+        require(_zones <= MAX_ZONES, "Zones exceed maximum");
+        
+        uint8 oldZones = zones[_playerId];
+        zones[_playerId] = _zones;
+            }
+
+    /// @notice Hard-set round number (for testing purposes)
+    /// @param _round The round number to set
+    function hardSetRound(uint8 _round) external onlyOwner {
+        uint8 oldRound = currentRound;
+        currentRound = _round;
+        
+        emit RoundIncremented(_round);
+    }
+
+    /// @notice Reset all zones to 0 (for testing purposes)
+    function resetAllZones() external onlyOwner {
+        zones[1] = 0;
+        zones[2] = 0;
+    }
+
+    /// @notice Get current game state for testing
+    function getGameState() external view returns (
+        uint8 player1Zones,
+        uint8 player2Zones,
+        uint8 round
+    ) {
+        return (zones[1], zones[2], currentRound);
     }
 }
