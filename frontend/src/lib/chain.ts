@@ -1,4 +1,4 @@
-import { arbitrumSepolia, baseSepolia, Chain } from 'viem/chains';
+import { arbitrumSepolia, baseSepolia, sepolia, Chain } from 'viem/chains';
 
 export function mapChainIdToChain(chainId: number): Chain | undefined {
   switch (chainId) {
@@ -6,6 +6,8 @@ export function mapChainIdToChain(chainId: number): Chain | undefined {
       return baseSepolia;
     case arbitrumSepolia.id:
       return arbitrumSepolia;
+    case sepolia.id:
+      return sepolia;
     default:
       return undefined;
   }

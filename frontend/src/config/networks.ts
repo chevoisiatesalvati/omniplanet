@@ -1,3 +1,7 @@
+import baseDeployment from '../../../lz/starship-nft/deployments/base-testnet/MyONFT721Mock.json';
+import arbitrumDeployment from '../../../lz/starship-nft/deployments/arbitrum-testnet/MyONFT721Mock.json';
+import starHubDeployment from '../../../lz/StarHub/deployments/eth-sepolia/StarHub.json';
+
 export type NetworkKey = 'base-sepolia' | 'arbitrum-sepolia';
 
 interface NetworkConfigItem {
@@ -17,13 +21,12 @@ export const STARSHIP_ABI_PATHS = {
 
 // Contract addresses pulled from deployments json
 export const CONTRACT_ADDRESSES: Record<NetworkKey, `0x${string}`> = {
-  'base-sepolia': '0x037B44B33E41D5AdFBbC43A3d67f32b5b9876B99',
-  'arbitrum-sepolia': '0x037B44B33E41D5AdFBbC43A3d67f32b5b9876B99',
+  'base-sepolia': baseDeployment.address as `0x${string}`,
+  'arbitrum-sepolia': arbitrumDeployment.address as `0x${string}`,
 };
 
-// Ship specs contract address (PlayerStat contract) - deployed only on arbitrum-sepolia as hub
-export const SHIP_SPECS_ADDRESS =
-  '0x6758d41f52B9047bc05F7F882e35634e3a3A0Fa9' as const;
+// Ship specs contract address (StarHub contract) - deployed on eth-sepolia as hub
+export const SHIP_SPECS_ADDRESS = starHubDeployment.address as `0x${string}`;
 
 export const NETWORKS: Record<NetworkKey, NetworkConfigItem> = {
   'base-sepolia': {

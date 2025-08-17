@@ -1,5 +1,5 @@
 import { createPublicClient, createWalletClient, custom, http } from 'viem';
-import { baseSepolia, arbitrumSepolia, Chain } from 'viem/chains';
+import { baseSepolia, arbitrumSepolia, sepolia, Chain } from 'viem/chains';
 import { mapChainIdToChain } from '@/lib/chain';
 
 export const publicClients = {
@@ -9,6 +9,10 @@ export const publicClients = {
   }),
   [arbitrumSepolia.id]: createPublicClient({
     chain: arbitrumSepolia,
+    transport: http(),
+  }),
+  [sepolia.id]: createPublicClient({
+    chain: sepolia,
     transport: http(),
   }),
 } as const;
@@ -35,6 +39,8 @@ export function getPublicClientByChainId(chainId: number) {
       return publicClients[baseSepolia.id];
     case arbitrumSepolia.id:
       return publicClients[arbitrumSepolia.id];
+    case sepolia.id:
+      return publicClients[sepolia.id];
     default:
       return publicClients[baseSepolia.id];
   }

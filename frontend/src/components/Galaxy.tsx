@@ -22,7 +22,7 @@ import {
 import { PLANET_TO_NETWORK, type NetworkKey } from '@/config/networks';
 import { useStarship } from '@/hooks/useStarship';
 import { useCurrentNetworkKey } from '@/hooks/useCurrentNetwork';
-import { useShipSpecs } from '@/hooks/useShipSpecs';
+import { useStarHubContract } from '@/hooks/useStarHubContract';
 
 interface GalaxyProps {
   onBackToCockpit: () => void;
@@ -187,10 +187,7 @@ function Planet({
 export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
   const currentNetwork = useCurrentNetworkKey('base-sepolia');
   const { state, travel } = useStarship(currentNetwork);
-  const { state: shipSpecsState } = useShipSpecs(
-    currentNetwork,
-    state.tokenId || 1n
-  );
+  const { state: starHubState } = useStarHubContract();
   const planets: PlanetDescriptor[] = [
     {
       id: 1,
@@ -355,10 +352,10 @@ export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
             <Zap className='w-4 h-4 text-yellow-400' />
             <span className='text-white'>
               ATK:{' '}
-              {shipSpecsState.isLoading
+              {starHubState.isLoading
                 ? '...'
-                : shipSpecsState.specs
-                  ? Number(shipSpecsState.specs.attack)
+                : starHubState.shipSpecs
+                  ? Number(starHubState.shipSpecs.attack)
                   : '10'}
             </span>
           </div>
@@ -366,22 +363,21 @@ export default function Galaxy({ onBackToCockpit }: GalaxyProps) {
             <Shield className='w-4 h-4 text-blue-400' />
             <span className='text-white'>
               DEF:{' '}
-              {shipSpecsState.isLoading
+              {starHubState.isLoading
                 ? '...'
-                : shipSpecsState.specs
-                  ? Number(shipSpecsState.specs.defense)
+                : starHubState.shipSpecs
+                  ? Number(starHubState.shipSpecs.defense)
                   : '10'}
             </span>
           </div>
           <div className='flex items-center gap-1'>
             <Heart className='w-4 h-4 text-red-400' />
             <span className='text-white'>
-              {shipSpecsState.isLoading
+              {starHubState.isLoading
                 ? '...'
-                : shipSpecsState.specs
-                  ? Number(shipSpecsState.specs.health)
+                : starHubState.shipSpecs
+                  ? Number(starHubState.shipSpecs.health)
                   : '100'}
-              %
             </span>
           </div>
         </motion.div>

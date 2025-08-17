@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useMemo } from 'react';
 import { useStarship } from '@/hooks/useStarship';
-import { useShipSpecs } from '@/hooks/useShipSpecs';
+import { useStarHubContract } from '@/hooks/useStarHubContract';
 import { useCurrentNetworkKey } from '@/hooks/useCurrentNetwork';
 import {
   Rocket,
@@ -36,10 +36,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
   const [showMintDialog, setShowMintDialog] = useState(false);
   const currentNetwork = useCurrentNetworkKey('base-sepolia');
   const { state, mint, refresh } = useStarship(currentNetwork);
-  const { state: shipSpecsState, refresh: refreshShipSpecs } = useShipSpecs(
-    currentNetwork,
-    state.tokenId || 1n
-  );
+  const { state: starHubState, refresh: refreshStarHub } = useStarHubContract();
 
   // Determine current ship location
   const currentLocation = useMemo(() => {
@@ -93,7 +90,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
     try {
       await mint(1n);
       await refresh();
-      await refreshShipSpecs();
+      await refreshStarHub();
       setIsHologramActive(true);
       onMintShip();
     } catch (e) {
@@ -228,23 +225,23 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
                           Starship Specs
                         </h3>
                         <div className='space-y-4'>
-                          {shipSpecsState.isLoading ? (
+                          {starHubState.isLoading ? (
                             <div className='text-center py-4'>
                               <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400 mx-auto'></div>
                               <p className='text-cyan-200 mt-2'>
                                 Loading specs...
                               </p>
                             </div>
-                          ) : shipSpecsState.error ? (
+                          ) : starHubState.error ? (
                             <div className='text-center py-4'>
                               <p className='text-red-400'>
                                 Error loading specs
                               </p>
                               <p className='text-red-300 text-sm'>
-                                {shipSpecsState.error}
+                                {starHubState.error}
                               </p>
                             </div>
-                          ) : shipSpecsState.specs ? (
+                          ) : starHubState.shipSpecs ? (
                             <>
                               <div className='flex justify-between items-center'>
                                 <div className='flex items-center'>
@@ -252,7 +249,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
                                   <span className='text-white'>Attack</span>
                                 </div>
                                 <span className='text-yellow-400 font-semibold'>
-                                  {Number(shipSpecsState.specs.attack)}
+                                  {Number(starHubState.shipSpecs.attack)}
                                 </span>
                               </div>
                               <div className='flex justify-between items-center'>
@@ -261,7 +258,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
                                   <span className='text-white'>Defense</span>
                                 </div>
                                 <span className='text-blue-400 font-semibold'>
-                                  {Number(shipSpecsState.specs.defense)}
+                                  {Number(starHubState.shipSpecs.defense)}
                                 </span>
                               </div>
                               <div className='flex justify-between items-center'>
@@ -270,7 +267,7 @@ export default function Cockpit({ onMintShip, onDeployShip }: CockpitProps) {
                                   <span className='text-white'>Health</span>
                                 </div>
                                 <span className='text-red-400 font-semibold'>
-                                  {Number(shipSpecsState.specs.health)}
+                                  {Number(starHubState.shipSpecs.health)}
                                 </span>
                               </div>
                             </>
