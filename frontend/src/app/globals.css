@@ -1,7 +1,97 @@
 @import 'tailwindcss';
-@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* OmniPlanet Space Theme Colors */
+  --color-omni-deep-space: #0a0a0f;
+  --color-omni-space-dark: #1a1a2e;
+  --color-omni-space-blue: #16213e;
+  --color-omni-cosmic-purple: #533483;
+  --color-omni-neon-blue: #00d4ff;
+  --color-omni-electric-blue: #0099cc;
+  --color-omni-stellar-purple: #8b5cf6;
+  --color-omni-cosmic-pink: #ec4899;
+  --color-omni-star-yellow: #fbbf24;
+  --color-omni-space-gray: #374151;
+  --color-omni-light-space: #6b7280;
+  --color-omni-white: #ffffff;
+  --color-omni-off-white: #f3f4f6;
+
+  /* Background Images */
+  --bg-space-gradient: linear-gradient(
+    135deg,
+    #0a0a0f 0%,
+    #16213e 50%,
+    #533483 100%
+  );
+  --bg-cosmic-gradient: linear-gradient(
+    135deg,
+    #533483 0%,
+    #8b5cf6 50%,
+    #ec4899 100%
+  );
+  --bg-stellar-gradient: linear-gradient(
+    135deg,
+    #00d4ff 0%,
+    #0099cc 50%,
+    #8b5cf6 100%
+  );
+
+  /* Font Families */
+  --font-display:
+    var(--font-orbitron), 'Orbitron', system-ui, Avenir, Helvetica, Arial,
+    sans-serif;
+  --font-mono: monospace;
+
+  /* Animations */
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-twinkle: twinkle 1.5s ease-in-out infinite alternate;
+
+  /* Backdrop Blur */
+  --backdrop-blur-xs: 2px;
+
+  /* Box Shadows */
+  --shadow-cosmic: 0 8px 32px rgba(0, 212, 255, 0.1);
+  --shadow-stellar: 0 0 20px rgba(139, 92, 246, 0.3);
+  --shadow-neon: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+@keyframes glow {
+  0% {
+    box-shadow:
+      0 0 5px #00d4ff,
+      0 0 10px #00d4ff,
+      0 0 15px #00d4ff;
+  }
+  100% {
+    box-shadow:
+      0 0 10px #00d4ff,
+      0 0 20px #00d4ff,
+      0 0 30px #00d4ff;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 
 :root {
   /* OmniPlanet Space Theme Colors */
@@ -19,29 +109,14 @@
   --omni-white: #ffffff;
   --omni-off-white: #f3f4f6;
 
-  /* Legacy CDP variables for compatibility */
-  --cdp-example-page-bg-color: var(--omni-deep-space);
-  --cdp-example-bg-overlay-color: rgba(0, 0, 0, 0.25);
-  --cdp-example-bg-skeleton-color: rgba(255, 255, 255, 0.1);
-  --cdp-example-text-color: var(--omni-white);
-  --cdp-example-text-secondary-color: var(--omni-light-space);
-  --cdp-example-accent-color: var(--omni-neon-blue);
-  --cdp-example-accent-hover-color: var(--omni-electric-blue);
-  --cdp-example-accent-foreground-color: var(--omni-deep-space);
-  --cdp-example-bg-low-contrast-color: var(--omni-space-blue);
-  --cdp-example-card-bg-color: var(--omni-space-dark);
-  --cdp-example-card-border-color: var(--omni-cosmic-purple);
-  --cdp-example-card-max-width: 30rem;
-  --cdp-example-base-font-size: 16px;
-  --cdp-example-font-family:
-    var(--font-orbitron), 'Orbitron', system-ui, Avenir, Helvetica, Arial,
-    sans-serif;
+  /* Theme Variables */
+  --card-max-width: 30rem;
+  --base-font-size: 16px;
 
   background-color: var(--omni-deep-space);
   color: var(--omni-white);
   color-scheme: dark;
-  font-family: var(--cdp-example-font-family);
-  font-size: var(--cdp-example-base-font-size);
+  font-size: var(--base-font-size);
   font-synthesis: none;
   font-weight: 400;
   line-height: 1.5;
@@ -84,17 +159,7 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    --cdp-example-page-bg-color: var(--omni-deep-space);
-    --cdp-example-bg-overlay-color: rgba(0, 0, 0, 0.25);
-    --cdp-example-bg-skeleton-color: rgba(255, 255, 255, 0.1);
-    --cdp-example-text-color: var(--omni-white);
-    --cdp-example-text-secondary-color: var(--omni-light-space);
-    --cdp-example-accent-color: var(--omni-neon-blue);
-    --cdp-example-accent-hover-color: var(--omni-electric-blue);
-    --cdp-example-accent-foreground-color: var(--omni-deep-space);
-    --cdp-example-bg-low-contrast-color: var(--omni-space-blue);
-    --cdp-example-card-bg-color: var(--omni-space-dark);
-    --cdp-example-card-border-color: var(--omni-cosmic-purple);
+    /* Keep dark theme even in light mode for space theme consistency */
   }
 }
 
@@ -259,7 +324,7 @@ header .wallet-address {
   flex-direction: column;
   gap: 1rem;
   justify-content: space-between;
-  max-width: var(--cdp-example-card-max-width);
+  max-width: var(--card-max-width);
   padding: 2rem 1rem;
   text-align: center;
   width: 100%;
@@ -360,7 +425,7 @@ header .wallet-address {
 
 @media (min-width: 860px) {
   :root {
-    --cdp-example-card-max-width: 35rem;
+    --card-max-width: 35rem;
   }
 
   .main-inner {
@@ -371,7 +436,7 @@ header .wallet-address {
 
 @media (min-width: 1920px) {
   :root {
-    --cdp-base-font-size: 20px;
+    --base-font-size: 20px;
   }
 }
 

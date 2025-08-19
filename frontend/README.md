@@ -1,6 +1,6 @@
-# CDP React App
+# OmniPlanet - Space Commander Terminal
 
-This project was generated with [`@coinbase/create-cdp-app`](https://coinbase.github.io/cdp-web/modules/_coinbase_create-cdp-app.html) using the Next.js template.
+A Next.js application for minting and commanding starships in the OmniPlanet universe. This space commander terminal provides NFT starship collection and management capabilities.
 
 ## Project Structure
 
@@ -14,31 +14,26 @@ src/
 │
 └── components/          # Reusable React components
     ├── ClientApp.tsx    # Client-side application wrapper
+    ├── Cockpit.tsx      # Starship cockpit interface
+    ├── CustomConnectButton.tsx # Custom wallet connection button
+    ├── Galaxy.tsx       # Galaxy visualization component
     ├── Header.tsx       # Navigation header with authentication status
     ├── Icons.tsx        # Reusable icon components
-    ├── Loading.tsx      # Loading state component
-    ├── Providers.tsx    # CDP and theme providers setup
-    ├── SignInScreen.tsx # Authentication screen with CDP sign-in flow
-    ├── SignedInScreen.tsx # Screen displayed after successful authentication
-    ├── theme.ts         # Theme configuration and styling constants
-    ├── Transaction.tsx  # Example transaction flow using CDP Hooks
-    └── UserBalance.tsx  # Component to display user's wallet balance
+    ├── OnboardingScreen.tsx # User onboarding interface
+    ├── Providers.tsx    # Web3 and theme providers setup
+    ├── StarBackground.tsx # Animated star background
+    └── Starship3D.tsx   # 3D starship visualization
 ```
 
 ## Getting Started
 
-First, make sure you have your CDP Project ID:
+First, set up your environment variables:
 
-1. Sign in or create an account on the [CDP Portal](https://portal.cdp.coinbase.com)
-2. Copy your Project ID from the dashboard
-3. Go to the [Embedded Wallets CORS settings](https://portal.cdp.coinbase.com/products/embedded-wallets/cors)
-4. Click add origin and whitelist `http://localhost:3000` (or wherever your app will run)
+1. Copy the `env.example` file to `.env.local`
+2. Add your WalletConnect Project ID for wallet connections
 
-Then, copy the `env.example` file to `.env`, and populate the `NEXT_PUBLIC_CDP_PROJECT_ID` with your project id.
+Then install dependencies and start the development server:
 
-Now you can start the development server:
-
-Using npm:
 ```bash
 # Install dependencies
 npm install
@@ -47,39 +42,25 @@ npm install
 npm run dev
 ```
 
-Using yarn:
-```bash
-# Install dependencies
-yarn
-
-# Start the development server
-yarn dev
-```
-
-Using pnpm:
-```bash
-# Install dependencies
-pnpm install
-
-# Start the development server
-pnpm dev
-```
-
 Visit [http://localhost:3000](http://localhost:3000) to see your app.
 
 ## Features
 
-This template comes with:
+This application includes:
+
 - Next.js 15 App Router
-- CDP React components for authentication and wallet management
-- Example transaction components for Base Sepolia
-- Built-in TypeScript support
-- ESLint with Next.js configuration
-- Viem for type-safe Ethereum interactions
+- RainbowKit for wallet connections
+- Wagmi for Ethereum interactions
+- Three.js for 3D graphics
+- Framer Motion for animations
+- Tailwind CSS v4 for styling
+- TypeScript support
+- Space-themed UI with custom animations
 
 ## Learn More
 
-- [CDP Documentation](https://docs.cloud.coinbase.com/cdp/docs)
-- [CDP React Documentation](https://docs.cloud.coinbase.com/cdp/docs/react-components)
-- [CDP Portal](https://portal.cdp.coinbase.com)
-- [Vite Documentation](https://vitejs.dev)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [RainbowKit Documentation](https://www.rainbowkit.com)
+- [Wagmi Documentation](https://wagmi.sh)
+- [Three.js Documentation](https://threejs.org/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
